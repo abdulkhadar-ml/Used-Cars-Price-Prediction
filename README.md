@@ -53,6 +53,9 @@ Fuel Type,
 Transmission,
 Seller Type
 
+End Users Can also Download their Valuation Report in the Form of PDF.
+Can Also Visualise The Output Through Gauge Visualization too..
+
 AND GET PREDICTED CAR PRICE INSTANTLY..
 
 To see The Working Demo: https://used-cars-price-prediction-afbdtk8x6ntnigcpvha5la.streamlit.app/
