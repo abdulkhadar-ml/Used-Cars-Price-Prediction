@@ -57,6 +57,19 @@ if mode:
         [data-testid="stSidebarNav"] {
             display: none !important;
         }
+
+        /* Download button - dark mode */
+        [data-testid="stDownloadButton"] button {
+            background-color: #1E1E1E !important;
+            color: white !important;
+            border: 1px solid #FF4B4B !important;
+            border-radius: 10px !important;
+            width: 100% !important;
+        }
+        [data-testid="stDownloadButton"] button:hover {
+            background-color: #FF4B4B !important;
+            color: white !important;
+        }
         </style>
     """, unsafe_allow_html=True)
 
@@ -96,6 +109,19 @@ else:
         [data-testid="stSidebarNav"] {
             display: none !important;
         }
+
+        /* Download button - light mode */
+        [data-testid="stDownloadButton"] button {
+            background-color: #F0F2F6 !important;
+            color: #262730 !important;
+            border: 1px solid #d3d3d3 !important;
+            border-radius: 10px !important;
+            width: 100% !important;
+        }
+        [data-testid="stDownloadButton"] button:hover {
+            background-color: #262730 !important;
+            color: white !important;
+        }
         </style>
     """, unsafe_allow_html=True)
 
@@ -108,20 +134,20 @@ with open("scaler.pkl", "rb") as f:
 
 # Brand logos
 brand_logos = {
-    "BMW":"bmw.png",
-    "Audi":"audi.png",
-    "Chevrolet":"chevrolet.webp",
-    "Ford":"ford.jpeg",
-    "Honda":"honda.png",
-    "Hyundai":"hyundai.png",
-    "Mahindra":"mahindra1.jpeg",
-    "Maruti":"maruti.jpeg",
-    "Mercedes-Benz":"mercedes-benz.png",
-    "Nissan":"nissan.png",
-    "Renault":"renault.png",
-    "Skoda":"skoda.jpg",
-    "Tata":"tata.webp",
-    "Toyota":"toyota.png"
+    "BMW":"logos/bmw.png",
+    "Audi":"logos/audi.png",
+    "Chevrolet":"logos/chevrolet.webp",
+    "Ford":"logos/ford.jpeg",
+    "Honda":"logos/honda.png",
+    "Hyundai":"logos/hyundai.png",
+    "Mahindra":"logos/mahindra1.jpeg",
+    "Maruti":"logos/maruti.jpeg",
+    "Mercedes-Benz":"logos/mercedes-benz.png",
+    "Nissan":"logos/nissan.png",
+    "Renault":"logos/renault.png",
+    "Skoda":"logos/skoda.jpg",
+    "Tata":"logos/tata.webp",
+    "Toyota":"logos/toyota.png"
 }
 
 # ── Header with logo ──────────────────────────────────────────────────────────
@@ -132,7 +158,7 @@ if logo_b64:
             <img src="data:image/png;base64,{logo_b64}"
                  style="width:80px; height:80px; border-radius:50%; object-fit:cover; box-shadow:0 2px 12px rgba(0,0,0,0.25);" />
             <div>
-                <h1 style="margin:0; font-size:2.2rem; font-weight:800; letter-spacing:-0.5px;">RideRepublic AI</h1>
+                <h1 style="margin:0; font-size:2.2rem; font-weight:800; letter-spacing:-0.5px;">RideRepublic</h1>
                 <p style="margin:0; font-size:1rem; opacity:0.65;">Smart Car Pricing · AI-Powered Valuation</p>
             </div>
         </div>
@@ -140,7 +166,7 @@ if logo_b64:
         unsafe_allow_html=True
     )
 else:
-    st.title("🚗 RideRepublic AI")
+    st.title("🚗 RideRepublic")
 
 st.markdown("### Predict Your Car's Resale Value Instantly")
 st.markdown("---")
@@ -149,8 +175,8 @@ st.markdown("---")
 st.sidebar.header("Enter Car Details")
 
 brands = [
-"Nissan","Audi","Chevrolet","Ford","Honda","Hyundai",
-"Mahindra","Maruti","Mercedes-Benz","BMW",
+"BMW","Audi","Chevrolet","Ford","Honda","Hyundai",
+"Mahindra","Maruti","Mercedes-Benz","Nissan",
 "Renault","Skoda","Tata","Toyota","Other"
 ]
 
@@ -160,7 +186,7 @@ if "reset_counter" not in st.session_state:
 rc = st.session_state.reset_counter
 
 brand        = st.sidebar.selectbox("Brand", brands, index=0, key=f"brand_{rc}")
-year         = st.sidebar.number_input("Year", 1985, 2026, 2018, key=f"year_{rc}")
+year         = st.sidebar.number_input("Year", 2000, 2026, 2018, key=f"year_{rc}")
 km_driven    = st.sidebar.number_input("KM Driven", 0, 300000, 40000, key=f"km_{rc}")
 mileage      = st.sidebar.number_input("Mileage (km/l)", 5.0, 40.0, 18.0, key=f"mileage_{rc}")
 engine       = st.sidebar.number_input("Engine (CC)", 800, 5000, 1500, key=f"engine_{rc}")
