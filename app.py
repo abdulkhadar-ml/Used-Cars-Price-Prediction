@@ -158,7 +158,7 @@ if logo_b64:
             <img src="data:image/png;base64,{logo_b64}"
                  style="width:80px; height:80px; border-radius:50%; object-fit:cover; box-shadow:0 2px 12px rgba(0,0,0,0.25);" />
             <div>
-                <h1 style="margin:0; font-size:2.2rem; font-weight:800; letter-spacing:-0.5px;">RideRepublic</h1>
+                <h1 style="margin:0; font-size:2.2rem; font-weight:800; letter-spacing:-0.5px;">RideRepublic AI</h1>
                 <p style="margin:0; font-size:1rem; opacity:0.65;">Smart Car Pricing · AI-Powered Valuation</p>
             </div>
         </div>
