@@ -339,7 +339,10 @@ def generate_pdf(brand, year, km_driven, mileage, engine, seats,
     pdf.set_font("Helvetica", "", 8)
     pdf.set_text_color(30, 30, 30)
     for tip in tips:
+        x = pdf.get_x()
+        pdf.set_x(10)
         pdf.multi_cell(W, 5, f"  * {tip}")
+        pdf.set_x(10)
 
     # ── Footer ──
     pdf.set_y(-18)
