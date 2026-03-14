@@ -499,7 +499,7 @@ The machine learning model analyzes:
 • Brand  
 • Ownership history  
          
-RideRepublic © 2026
+RideRepublic AI © 2026
 """)
 
 st.markdown("---")
