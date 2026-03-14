@@ -675,7 +675,4 @@ st.markdown(
     'RideRepublic 2026 &nbsp;&nbsp; Python &nbsp;&nbsp; Scikit-Learn &nbsp;&nbsp;'
     ' Streamlit &nbsp;&nbsp; Plotly &nbsp;&nbsp; FPDF2'
     '</div>',
-    unsafe_allow_html=True
-)ior & Exterior: A well-maintained car attracts better resale offers.",
-        "Accident-Free Record: Vehicles without accident history maintain higher value.",
-        
+    unsafe_allow_html=True)
