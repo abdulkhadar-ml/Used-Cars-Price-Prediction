@@ -158,7 +158,7 @@ st.markdown(dark_css if mode else light_css, unsafe_allow_html=True)
 logo_img = ""
 if logo_b64:
     logo_img = (f'<img src="data:image/png;base64,{logo_b64}" '
-                f'style="width:52px;height:52px;border-radius:50%;object-fit:cover;" />')
+                f'style="width:90px;height:90px;border-radius:50%;object-fit:cover;" />')
 
 st.markdown(
     f'<div class="hero-section">'
