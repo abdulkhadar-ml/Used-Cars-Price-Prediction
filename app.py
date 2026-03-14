@@ -638,7 +638,7 @@ if predict_btn:
         with open(pdf_path, "rb") as f:
             pdf_bytes = f.read()
 
-       st.download_button(
+st.download_button(
     label="Download PDF Report",
     data=pdf_bytes,
     file_name=f"RideRepublic_{brand}_{year}_Report.pdf",
