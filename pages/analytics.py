@@ -55,9 +55,9 @@ div.stButton > button {
     border: 1px solid #2A2A45; border-radius: 20px;
     padding: 2rem 2.5rem; margin-bottom: 1.5rem;
 }
-.hero-title { font-size: 2.2rem; font-weight: 800; color: #FFFFFF; margin: 0; }
+.hero-title { font-size: clamp(1.3rem, 5vw, 2.2rem); font-weight: 800; color: #FFFFFF; margin: 0; }
 .hero-accent { color: #E8B84B; }
-.hero-sub { font-size: 0.92rem; color: rgba(255,255,255,0.5); margin-top: 0.3rem; }
+.hero-sub { font-size: clamp(0.78rem, 3vw, 0.92rem); color: rgba(255,255,255,0.5); margin-top: 0.3rem; }
 .hero-badge {
     display: inline-flex; background: rgba(232,184,75,0.1);
     border: 1px solid rgba(232,184,75,0.25); color: #E8B84B;
@@ -112,9 +112,9 @@ div.stButton > button {
     background: linear-gradient(135deg, #111122 0%, #1A1A3A 100%);
     border-radius: 20px; padding: 2rem 2.5rem; margin-bottom: 1.5rem;
 }
-.hero-title { font-size: 2.2rem; font-weight: 800; color: #FFFFFF; margin: 0; }
+.hero-title { font-size: clamp(1.3rem, 5vw, 2.2rem); font-weight: 800; color: #FFFFFF; margin: 0; }
 .hero-accent { color: #E8B84B; }
-.hero-sub { font-size: 0.92rem; color: rgba(255,255,255,0.55); margin-top: 0.3rem; }
+.hero-sub { font-size: clamp(0.78rem, 3vw, 0.92rem); color: rgba(255,255,255,0.55); margin-top: 0.3rem; }
 .hero-badge {
     display: inline-flex; background: rgba(232,184,75,0.15);
     border: 1px solid rgba(232,184,75,0.4); color: #E8B84B;
@@ -158,11 +158,11 @@ st.markdown(dark_css if mode else light_css, unsafe_allow_html=True)
 logo_img = ""
 if logo_b64:
     logo_img = (f'<img src="data:image/png;base64,{logo_b64}" '
-                f'style="width:90px;height:90px;border-radius:50%;object-fit:cover;" />')
+                f'style="width:45px;height:45px;border-radius:50%;object-fit:cover;" />')
 
 st.markdown(
     f'<div class="hero-section">'
-    f'<div style="display:flex;align-items:center;gap:16px;">'
+    f'<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">'
     f'<div>{logo_img}</div>'
     f'<div>'
     f'<div class="hero-badge">DATA INSIGHTS</div>'
@@ -200,7 +200,7 @@ def apply_layout(fig, title=""):
 st.subheader("Dataset Overview")
 k1, k2, k3, k4, k5 = st.columns(5)
 stats = [
-    (f"{len(df):,}", "Total Records"),
+    (f"{len(df):,}", "Total Records After Data Cleaning"),
     (str(df['brand'].nunique() if 'brand' in df.columns else 14), "Brands"),
     (f"Rs.{df['price_lakh'].mean():.1f}L", "Avg Price"),
     (f"{int(df['year'].min())}-{int(df['year'].max())}", "Year Range"),
@@ -322,7 +322,7 @@ st.markdown(
 # ── Footer ────────────────────────────────────────────────────────────────────
 st.markdown(
     '<div class="footer-bar">'
-    'RideRepublic Analytics 2026 &nbsp;&nbsp; Python &nbsp;&nbsp;'
+    'RideRepublic © Analytics 2026 &nbsp;&nbsp; Python &nbsp;&nbsp;'
     ' Scikit-Learn &nbsp;&nbsp; Streamlit &nbsp;&nbsp; Plotly'
     '</div>',
     unsafe_allow_html=True
