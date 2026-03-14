@@ -322,7 +322,7 @@ if st.sidebar.button("Reset Inputs"):
 logo_img = ""
 if logo_b64:
     logo_img = (f'<img src="data:image/png;base64,{logo_b64}" '
-                f'style="width:60px;height:60px;border-radius:50%;object-fit:cover;" />')
+                f'style="width:90px;height:90px;border-radius:50%;object-fit:cover;" />')
 
 st.markdown(
     f'<div class="hero-section">'
