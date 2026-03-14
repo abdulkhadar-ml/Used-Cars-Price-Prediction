@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-import streamlit_antd_components as sac
 import base64
 
 st.set_page_config(page_title="RideRepublic Analytics", page_icon="riderepublic_logo.png", layout="wide")
