@@ -17,7 +17,7 @@ def get_logo_base64(path="riderepublic_logo.png"):
 logo_b64 = get_logo_base64()
 
 with st.sidebar:
-    mode = sac.switch(label='Theme', align='start', size='md', on_label='Moon', off_label='Sun')
+    mode = sac.switch(label='Theme', align='start', size='md', on_label='🌙', off_label='☀️')
     st.markdown("<hr style='border:none;border-top:1px solid rgba(128,128,128,0.2);margin:0.5rem 0;'>", unsafe_allow_html=True)
     if st.button("Back to Home"):
         st.switch_page("app.py")
