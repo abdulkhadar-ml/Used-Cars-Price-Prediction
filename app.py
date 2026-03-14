@@ -668,41 +668,39 @@ ac2.markdown(
         unsafe_allow_html=True
     )
 
-# ── Analytics CTA ─────────────────────────────────────────────────────────────
+# ── Analytics CTA + Download Button ──────────────────────────────────────────
 st.write("")
-cta_col, _ = st.columns([1, 2])
-with cta_col:
+cta_col1, cta_col2, _ = st.columns([1, 1, 1])
+with cta_col1:
     if st.button("Open Analytics Dashboard"):
         st.switch_page("pages/analytics.py")
-
-# ── Download Button at bottom ────────────────────────────────────────────────
-if st.session_state.get("pdf_ready"):
-    st.write("")
-    st.subheader("Valuation Report")
-    pdf_path = generate_pdf(
-        st.session_state.pdf_brand, st.session_state.pdf_year,
-        st.session_state.pdf_km, st.session_state.pdf_mileage,
-        st.session_state.pdf_engine, st.session_state.pdf_seats,
-        st.session_state.pdf_owner, st.session_state.pdf_fuel,
-        st.session_state.pdf_transmission, st.session_state.pdf_seller,
-        st.session_state.pdf_price, st.session_state.pdf_low,
-        st.session_state.pdf_high, st.session_state.pdf_dep_df
-    )
-    with open(pdf_path, "rb") as f:
-        pdf_bytes = f.read()
-    os.unlink(pdf_path)
-    st.download_button(
-        label="Download PDF Report",
-        data=pdf_bytes,
-        file_name=f"RideRepublic_{st.session_state.pdf_brand}_{st.session_state.pdf_year}_Report.pdf",
-        mime="application/pdf"
-    )
+with cta_col2:
+    if st.session_state.get("pdf_ready"):
+        pdf_path = generate_pdf(
+            st.session_state.pdf_brand, st.session_state.pdf_year,
+            st.session_state.pdf_km, st.session_state.pdf_mileage,
+            st.session_state.pdf_engine, st.session_state.pdf_seats,
+            st.session_state.pdf_owner, st.session_state.pdf_fuel,
+            st.session_state.pdf_transmission, st.session_state.pdf_seller,
+            st.session_state.pdf_price, st.session_state.pdf_low,
+            st.session_state.pdf_high, st.session_state.pdf_dep_df
+        )
+        with open(pdf_path, "rb") as f:
+            pdf_bytes = f.read()
+        os.unlink(pdf_path)
+        st.download_button(
+            label="Download PDF Report",
+            data=pdf_bytes,
+            file_name=f"RideRepublic_{st.session_state.pdf_brand}_{st.session_state.pdf_year}_Report.pdf",
+            mime="application/pdf",
+            use_container_width=True
+        )
 
 # ── Footer ────────────────────────────────────────────────────────────────────
 st.markdown(
     '<div class="footer-bar">'
     'RideRepublic 2026 &nbsp;&nbsp; Python &nbsp;&nbsp; Scikit-Learn &nbsp;&nbsp;'
-    ' Streamlit &nbsp;&nbsp; Plotly &nbsp;&nbsp; FPDF2'
+    ' Streamlit &nbsp;s&nbsp; Plotly &nbsp;&nbsp; FPDF2'
     '</div>',
     unsafe_allow_html=True
 )
