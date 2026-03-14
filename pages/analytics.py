@@ -17,11 +17,19 @@ def get_logo_base64(path="riderepublic_logo.png"):
 logo_b64 = get_logo_base64()
 
 # ── Theme Toggle - NO on_label/off_label to avoid keyboard_double bug ────────
+if "dark_mode" not in st.session_state:
+    st.session_state.dark_mode = False
+
 with st.sidebar:
-    mode = sac.switch(label='Dark Mode', align='start', size='md')
+    toggle_label = "🌙 Dark Mode" if not st.session_state.dark_mode else "☀️ Light Mode"
+    if st.sidebar.button(toggle_label, key="theme_toggle"):
+        st.session_state.dark_mode = not st.session_state.dark_mode
+        st.rerun()
     st.markdown("<hr style='border:none;border-top:1px solid rgba(128,128,128,0.2);margin:0.5rem 0;'>", unsafe_allow_html=True)
     if st.button("Back to Home"):
         st.switch_page("app.py")
+
+mode = st.session_state.dark_mode
 
 ACCENT = "#E8B84B"
 
@@ -102,7 +110,7 @@ else:
         font-weight: 700 !important; width: 100% !important;
     }}
     .hero-section {{
-        background: linear-gradient(135deg, #1A1A2E 0%, #2D2D5E 100%);
+        background: linear-gradient(135deg, #111122 0%, #1A1A3E 100%);
         border-radius: 20px; padding: 2rem 2.5rem; margin-bottom: 1.5rem;
     }}
     .hero-title {{ font-size: 2.2rem; font-weight: 800; color: #FFFFFF; margin: 0; }}
@@ -157,7 +165,7 @@ st.markdown(f"""
         <div>{logo_img}</div>
         <div>
             <div class="hero-badge">DATA INSIGHTS</div>
-            <h1 class="hero-title">Ride<span class="hero-accent">Republic</span> Analytics</h1>
+            <h1 class="hero-title"><span style="color:#FFFFFF;">Ride</span><span class="hero-accent">Republic</span> <span style="color:#FFFFFF;">Analytics</span></h1>
             <p class="hero-sub">Dataset analysis, distribution insights and model performance</p>
         </div>
     </div>
