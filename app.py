@@ -703,7 +703,7 @@ with cta_col2:
 # ── Footer ────────────────────────────────────────────────────────────────────
 st.markdown(
     '<div class="footer-bar">'
-    'RideRepublic 2026 &nbsp;&nbsp; Python &nbsp;&nbsp; Scikit-Learn &nbsp;&nbsp;'
+    'RideRepublic © 2026 &nbsp;&nbsp; Python &nbsp;&nbsp; Scikit-Learn &nbsp;&nbsp;'
     ' Streamlit &nbsp;&nbsp; Plotly &nbsp;&nbsp; FPDF2'
     '</div>',
     unsafe_allow_html=True
