@@ -5,8 +5,8 @@ import pickle
 import plotly.graph_objects as go
 import base64
 import os
-from fpdf import FPDF
 import tempfile
+from fpdf import FPDF
 from datetime import datetime
 
 st.set_page_config(
@@ -376,6 +376,7 @@ with pcol:
     predict_btn = st.button("Predict Resale Price", use_container_width=True)
 
 
+
 # ── PDF Generator ─────────────────────────────────────────────────────────────
 def generate_pdf(brand, year, km_driven, mileage, engine, seats,
                  owner_label, fuel, transmission, seller_type,
@@ -385,7 +386,7 @@ def generate_pdf(brand, year, km_driven, mileage, engine, seats,
     pdf.add_page()
     W = 190
     pdf.set_fill_color(15, 15, 15)
-    pdf.rect(0, 0, 210, 30, 'F')
+    pdf.rect(0, 0, 210, 30, "F")
     if os.path.exists("riderepublic_logo.png"):
         pdf.image("riderepublic_logo.png", x=8, y=4, w=22)
     pdf.set_font("Helvetica", "B", 18)
@@ -397,7 +398,7 @@ def generate_pdf(brand, year, km_driven, mileage, engine, seats,
     pdf.cell(100, 5, "Smart Car Pricing  |  AI-Powered Valuation")
     pdf.set_font("Helvetica", "", 8)
     pdf.set_xy(140, 11)
-    pdf.cell(60, 5, f"Generated: {datetime.now().strftime('%d %b %Y, %I:%M %p')}", align="R")
+    pdf.cell(60, 5, "Generated: " + datetime.now().strftime("%d %b %Y, %I:%M %p"), align="R")
     pdf.set_xy(10, 35)
     pdf.set_text_color(30, 30, 30)
     pdf.set_font("Helvetica", "B", 14)
@@ -410,34 +411,37 @@ def generate_pdf(brand, year, km_driven, mileage, engine, seats,
         pdf.set_font("Helvetica", "B", 10)
         pdf.set_fill_color(220, 220, 220)
         pdf.set_text_color(30, 30, 30)
-        pdf.cell(W, 7, f"  {title}", fill=True)
+        pdf.cell(W, 7, "  " + title, fill=True)
         pdf.ln(8)
     sec("Car Details")
     details = [
         ("Brand", brand), ("Year", str(year)),
-        ("KM Driven", f"{km_driven:,} km"), ("Mileage", f"{mileage} km/l"),
-        ("Engine", f"{engine} CC"), ("Seats", str(seats)),
+        ("KM Driven", str(km_driven) + " km"), ("Mileage", str(mileage) + " km/l"),
+        ("Engine", str(engine) + " CC"), ("Seats", str(seats)),
         ("Owner Type", owner_label), ("Fuel", fuel),
         ("Transmission", transmission), ("Seller Type", seller_type),
     ]
     pdf.set_font("Helvetica", "", 9)
     for i, (label, value) in enumerate(details):
-        pdf.set_fill_color(248, 248, 248) if i % 2 == 0 else pdf.set_fill_color(255, 255, 255)
+        if i % 2 == 0:
+            pdf.set_fill_color(248, 248, 248)
+        else:
+            pdf.set_fill_color(255, 255, 255)
         pdf.set_text_color(30, 30, 30)
-        pdf.cell(95, 6, f"  {label}", fill=True)
-        pdf.cell(95, 6, f"  {value}", fill=True)
+        pdf.cell(95, 6, "  " + label, fill=True)
+        pdf.cell(95, 6, "  " + value, fill=True)
         pdf.ln(6)
     pdf.ln(2)
     sec("Prediction Result")
     pdf.set_fill_color(20, 20, 20)
     pdf.set_text_color(255, 255, 255)
     pdf.set_font("Helvetica", "B", 12)
-    pdf.cell(W, 11, f"  Estimated Resale Price:  Rs. {price/100000:.2f} Lakhs  ({int(price):,})", fill=True)
+    pdf.cell(W, 11, "  Estimated Price: Rs. " + str(round(price/100000, 2)) + " Lakhs  (" + str(int(price)) + ")", fill=True)
     pdf.ln(13)
     pdf.set_fill_color(220, 245, 220)
     pdf.set_text_color(30, 30, 30)
     pdf.set_font("Helvetica", "", 9)
-    pdf.cell(W, 7, f"  Expected Range:  Rs. {low/100000:.2f} L  -  Rs. {high/100000:.2f} L", fill=True)
+    pdf.cell(W, 7, "  Range: Rs. " + str(round(low/100000, 2)) + " L  -  Rs. " + str(round(high/100000, 2)) + " L", fill=True)
     pdf.ln(9)
     sec("Projected Depreciation (6 Years)")
     pdf.set_font("Helvetica", "B", 9)
@@ -449,16 +453,19 @@ def generate_pdf(brand, year, km_driven, mileage, engine, seats,
     pdf.set_font("Helvetica", "", 9)
     pdf.set_text_color(30, 30, 30)
     for i, row in dep_df.iterrows():
-        pdf.set_fill_color(248, 248, 248) if i % 2 == 0 else pdf.set_fill_color(255, 255, 255)
-        pdf.cell(95, 6, f"  {int(row['Year'])}", fill=True)
-        pdf.cell(95, 6, f"  Rs. {row['Estimated Value']/100000:.2f} Lakhs", fill=True)
+        if i % 2 == 0:
+            pdf.set_fill_color(248, 248, 248)
+        else:
+            pdf.set_fill_color(255, 255, 255)
+        pdf.cell(95, 6, "  " + str(int(row["Year"])), fill=True)
+        pdf.cell(95, 6, "  Rs. " + str(round(row["Estimated Value"]/100000, 2)) + " Lakhs", fill=True)
         pdf.ln(6)
     pdf.ln(2)
     sec("Tips To Maintain Good Resale Value")
     tips = [
         "Regular Servicing: Maintain proper service records to build buyer trust.",
         "Low Mileage: Cars with lower mileage usually sell at higher prices.",
-        "Clean Interior & Exterior: A well-maintained car attracts better resale offers.",
+        "Clean Interior & Exterior: A well-maintained car attracts better.",
         "Accident-Free Record: Vehicles without accident history maintain higher value.",
         "Original Parts: Avoid replacing parts with non-genuine components.",
     ]
@@ -466,7 +473,7 @@ def generate_pdf(brand, year, km_driven, mileage, engine, seats,
     pdf.set_text_color(30, 30, 30)
     for tip in tips:
         pdf.set_x(10)
-        pdf.multi_cell(W, 5, f"  * {tip}")
+        pdf.multi_cell(W, 5, "  * " + tip)
         pdf.set_x(10)
     pdf.set_y(-18)
     pdf.set_draw_color(200, 200, 200)
@@ -593,7 +600,7 @@ if predict_btn:
 
 
 
-    # Store prediction results in session state for PDF download
+    # Store for PDF download
     st.session_state.pdf_ready = True
     st.session_state.pdf_brand = brand
     st.session_state.pdf_year = year
@@ -685,13 +692,13 @@ with cta_col2:
             st.session_state.pdf_price, st.session_state.pdf_low,
             st.session_state.pdf_high, st.session_state.pdf_dep_df
         )
-        with open(pdf_path, "rb") as f:
-            pdf_bytes = f.read()
+        with open(pdf_path, "rb") as pdf_file:
+            pdf_bytes = pdf_file.read()
         os.unlink(pdf_path)
         st.download_button(
             label="Download PDF Report",
             data=pdf_bytes,
-            file_name=f"RideRepublic_{st.session_state.pdf_brand}_{st.session_state.pdf_year}_Report.pdf",
+            file_name="RideRepublic_" + str(st.session_state.pdf_brand) + "_" + str(st.session_state.pdf_year) + "_Report.pdf",
             mime="application/pdf",
             use_container_width=True
         )
@@ -700,7 +707,7 @@ with cta_col2:
 st.markdown(
     '<div class="footer-bar">'
     'RideRepublic 2026 &nbsp;&nbsp; Python &nbsp;&nbsp; Scikit-Learn &nbsp;&nbsp;'
-    ' Streamlit &nbsp;s&nbsp; Plotly &nbsp;&nbsp; FPDF2'
+    ' Streamlit &nbsp;&nbsp; Plotly &nbsp;&nbsp; FPDF2'
     '</div>',
     unsafe_allow_html=True
 )
