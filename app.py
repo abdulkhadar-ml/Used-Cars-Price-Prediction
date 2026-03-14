@@ -719,5 +719,5 @@ st.markdown("""
 <div class="footer-bar">
     RideRepublic 2026 &nbsp;&nbsp; Python &nbsp;&nbsp; Scikit-Learn &nbsp;&nbsp; Streamlit &nbsp;&nbsp; Plotly &nbsp;&nbsp; FPDF2
 </div>
-""", unsafe_allow_html=True)g  = model.predict(input_df)
+""", unsafe_allow_html=True)  = model.predict(input_df)
         
