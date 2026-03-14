@@ -611,7 +611,7 @@ if brand in brand_logos:
     with bcol1:
         st.image(brand_logos[brand], width=100)
     with bcol2:
-        st.markdown(f"""
+        st.markdown(f""")
         <div style="padding: 1rem 0;">
             <p style="font-family:'Syne',sans-serif; font-size:1.4rem; font-weight:700; margin:0;">
                 {brand}
