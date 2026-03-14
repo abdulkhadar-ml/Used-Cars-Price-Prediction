@@ -9,7 +9,6 @@ from fpdf import FPDF
 import tempfile
 import os
 from datetime import datetime
-import time
 
 st.set_page_config(
     page_title="RideRepublic - Smart Car Pricing",
@@ -17,6 +16,17 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+# ── Cache model loading for speed ────────────────────────────────────────────
+@st.cache_resource
+def load_models():
+    with open("model.pkl", "rb") as f:
+        model = pickle.load(f)
+    with open("scaler.pkl", "rb") as f:
+        scaler = pickle.load(f)
+    return model, scaler
+
+model, scaler = load_models()
 
 def get_logo_base64(path="riderepublic_logo.png"):
     try:
@@ -27,579 +37,262 @@ def get_logo_base64(path="riderepublic_logo.png"):
 
 logo_b64 = get_logo_base64()
 
+# ── Theme Toggle - NO on_label/off_label to avoid keyboard_double bug ────────
 with st.sidebar:
-    mode = sac.switch(label='Theme', align='start', size='md', on_label='🌙', off_label='☀️')
+    mode = sac.switch(label='Dark Mode', align='start', size='md')
 
 ACCENT = "#E8B84B"
 ACCENT2 = "#FF6B6B"
 
+# ── CSS ───────────────────────────────────────────────────────────────────────
 if mode:
-    # DARK MODE
-    st.markdown("""
+    BG = "#0D0D14"
+    CARD = "#111118"
+    BORDER = "#252535"
+    TEXT = "#E2E2EE"
+    SUBTEXT = "#6666AA"
+    st.markdown(f"""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
-
-    html, body, [class*="css"], p, div, span, label {
-        font-family: 'Plus Jakarta Sans', sans-serif !important;
-    }
-
-    .stApp {
-        background-color: #0D0D14;
-        background-image: radial-gradient(ellipse at 15% 0%, rgba(232,184,75,0.08) 0%, transparent 55%);
-        color: #E2E2EE;
-    }
-
-    section[data-testid="stSidebar"] {
-        background-color: #111118 !important;
-        border-right: 1px solid #252535 !important;
-    }
-
-    [data-testid="stSidebarNav"] { display: none !important; }
-
-    /* Theme switch styling */
-    .stApp [data-testid="stSidebar"] .stToggle,
-    .stApp [data-testid="stSidebar"] [data-baseweb="checkbox"] {
-        background: transparent !important;
-    }
-
-    div.stButton > button {
-        background: linear-gradient(135deg, #E8B84B 0%, #D4A43A 100%) !important;
-        color: #0D0D14 !important;
-        border: none !important;
-        border-radius: 10px !important;
-        font-family: 'Plus Jakarta Sans', sans-serif !important;
-        font-weight: 700 !important;
-        font-size: 0.95rem !important;
-        width: 100% !important;
+    .stApp {{
+        background-color: {BG};
+        background-image: radial-gradient(ellipse at 15% 0%, rgba(232,184,75,0.07) 0%, transparent 55%);
+        color: {TEXT};
+        font-family: -apple-system, 'Segoe UI', sans-serif;
+    }}
+    section[data-testid="stSidebar"] {{
+        background-color: {CARD} !important;
+        border-right: 1px solid {BORDER} !important;
+    }}
+    [data-testid="stSidebarNav"] {{ display: none !important; }}
+    div.stButton > button {{
+        background: linear-gradient(135deg, {ACCENT} 0%, #D4A43A 100%) !important;
+        color: #0D0D14 !important; border: none !important;
+        border-radius: 10px !important; font-weight: 700 !important;
+        font-size: 0.95rem !important; width: 100% !important;
         transition: all 0.2s ease !important;
         box-shadow: 0 4px 18px rgba(232,184,75,0.35) !important;
-        letter-spacing: 0.2px !important;
-    }
-    div.stButton > button:hover {
+    }}
+    div.stButton > button:hover {{
         transform: translateY(-2px) !important;
         box-shadow: 0 8px 24px rgba(232,184,75,0.5) !important;
-    }
-
-    [data-testid="stDownloadButton"] button {
-        background: #1A1A28 !important;
-        color: #E8B84B !important;
-        border: 1.5px solid #E8B84B !important;
-        border-radius: 10px !important;
-        font-family: 'Plus Jakarta Sans', sans-serif !important;
-        font-weight: 600 !important;
-        width: 100% !important;
+    }}
+    [data-testid="stDownloadButton"] button {{
+        background: {CARD} !important; color: {ACCENT} !important;
+        border: 1.5px solid {ACCENT} !important; border-radius: 10px !important;
+        font-weight: 600 !important; width: 100% !important;
         transition: all 0.2s ease !important;
-    }
-    [data-testid="stDownloadButton"] button:hover {
-        background: #E8B84B !important;
-        color: #0D0D14 !important;
-    }
-
-    /* Input widgets */
-    [data-testid="stNumberInput"] input,
-    [data-testid="stSelectbox"] select,
-    div[data-baseweb="select"] {
-        font-family: 'Plus Jakarta Sans', sans-serif !important;
-        color: #E2E2EE !important;
-    }
-
-    [data-testid="stSidebarNav"] { display: none !important; }
-
-    .hero-section {
+    }}
+    [data-testid="stDownloadButton"] button:hover {{
+        background: {ACCENT} !important; color: #0D0D14 !important;
+    }}
+    .hero-section {{
         background: linear-gradient(135deg, #14142A 0%, #1C1C3A 100%);
-        border: 1px solid #2A2A45;
-        border-radius: 20px;
-        padding: 2.2rem 2.8rem;
-        margin-bottom: 1.5rem;
-        position: relative;
-        overflow: hidden;
-    }
-    .hero-section::after {
-        content: '';
-        position: absolute;
-        top: -40%;
-        right: -5%;
-        width: 350px;
-        height: 350px;
+        border: 1px solid #2A2A45; border-radius: 20px;
+        padding: 2.2rem 2.8rem; margin-bottom: 1.5rem;
+        position: relative; overflow: hidden;
+    }}
+    .hero-section::after {{
+        content: ''; position: absolute; top: -40%; right: -5%;
+        width: 350px; height: 350px;
         background: radial-gradient(circle, rgba(232,184,75,0.07) 0%, transparent 70%);
         pointer-events: none;
-    }
-    .hero-title {
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        font-size: 2.6rem;
-        font-weight: 800;
-        color: #FFFFFF;
-        margin: 0;
-        line-height: 1.15;
-        letter-spacing: -0.5px;
-    }
-    .hero-accent { color: #E8B84B; }
-    .hero-sub {
-        font-size: 1rem;
-        color: rgba(255,255,255,0.5);
-        margin-top: 0.4rem;
-        font-weight: 400;
-    }
-    .hero-badge {
+    }}
+    .hero-title {{ font-size: 2.6rem; font-weight: 800; color: #FFFFFF; margin: 0; line-height: 1.15; }}
+    .hero-accent {{ color: {ACCENT}; }}
+    .hero-sub {{ font-size: 1rem; color: rgba(255,255,255,0.5); margin-top: 0.4rem; }}
+    .hero-badge {{
         display: inline-flex; align-items: center; gap: 6px;
-        background: rgba(232,184,75,0.1);
-        border: 1px solid rgba(232,184,75,0.25);
-        color: #E8B84B;
-        border-radius: 50px;
-        padding: 4px 14px;
-        font-size: 0.75rem;
-        font-weight: 700;
-        letter-spacing: 1px;
-        margin-bottom: 0.9rem;
-        text-transform: uppercase;
-    }
-
-    .kpi-card {
-        background: #111118;
-        border: 1px solid #252535;
-        border-radius: 14px;
-        padding: 1.3rem 1.4rem;
-        text-align: center;
+        background: rgba(232,184,75,0.1); border: 1px solid rgba(232,184,75,0.25);
+        color: {ACCENT}; border-radius: 50px; padding: 4px 14px;
+        font-size: 0.75rem; font-weight: 700; letter-spacing: 1px;
+        margin-bottom: 0.9rem; text-transform: uppercase;
+    }}
+    .kpi-card {{
+        background: {CARD}; border: 1px solid {BORDER};
+        border-radius: 14px; padding: 1.3rem 1.4rem; text-align: center;
         transition: border-color 0.2s, transform 0.2s;
-    }
-    .kpi-card:hover { border-color: #E8B84B; transform: translateY(-2px); }
-    .kpi-icon { font-size: 1.6rem; margin-bottom: 0.3rem; }
-    .kpi-value {
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        font-size: 1.6rem;
-        font-weight: 800;
-        color: #E8B84B;
-        line-height: 1;
-    }
-    .kpi-label {
-        font-size: 0.72rem;
-        color: #6666AA;
-        text-transform: uppercase;
-        letter-spacing: 0.8px;
-        margin-top: 4px;
-    }
-
-    .brand-card {
-        background: #111118;
-        border: 1px solid #252535;
-        border-radius: 14px;
-        padding: 1.2rem 1.5rem;
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        margin-bottom: 1rem;
-    }
-    .brand-name {
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        font-size: 1.3rem;
-        font-weight: 700;
-        color: #FFFFFF;
-        margin: 0;
-    }
-    .brand-specs {
-        font-size: 0.82rem;
-        color: #6666AA;
-        margin: 3px 0 0 0;
-    }
-
-    .result-card {
+    }}
+    .kpi-card:hover {{ border-color: {ACCENT}; transform: translateY(-2px); }}
+    .kpi-value {{ font-size: 1.6rem; font-weight: 800; color: {ACCENT}; line-height: 1; }}
+    .kpi-label {{ font-size: 0.72rem; color: {SUBTEXT}; text-transform: uppercase; letter-spacing: 0.8px; margin-top: 4px; }}
+    .result-card {{
         background: linear-gradient(145deg, #14142A 0%, #1C1C3A 100%);
-        border: 1px solid rgba(232,184,75,0.3);
-        border-radius: 16px;
-        padding: 1.8rem;
-        text-align: center;
+        border: 1px solid rgba(232,184,75,0.3); border-radius: 16px;
+        padding: 1.8rem; text-align: center;
         box-shadow: 0 0 30px rgba(232,184,75,0.08);
-        height: 100%;
-    }
-    .result-label {
-        font-size: 0.72rem;
-        color: #6666AA;
-        text-transform: uppercase;
-        letter-spacing: 1.2px;
-        margin-bottom: 0.6rem;
-        font-weight: 600;
-    }
-    .result-price {
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        font-size: 2.6rem;
-        font-weight: 800;
-        color: #E8B84B;
-        line-height: 1;
-    }
-    .result-sub {
-        font-size: 0.82rem;
-        color: #6666AA;
-        margin-top: 0.4rem;
-    }
-    .result-sub span { color: #71ef99; font-weight: 600; }
-
-    .section-header {
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        font-size: 1.1rem;
-        font-weight: 700;
-        color: #FFFFFF;
-        margin: 0 0 1rem 0;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-    .section-header::after {
-        content: '';
-        flex: 1;
-        height: 1px;
-        background: linear-gradient(90deg, #252535, transparent);
-    }
-
-    .tip-card {
-        background: #111118;
-        border: 1px solid #252535;
-        border-left: 3px solid #E8B84B;
-        border-radius: 10px;
-        padding: 0.9rem 1.1rem;
-        margin-bottom: 0.6rem;
-        font-size: 0.88rem;
-        color: #AAAACC;
-        line-height: 1.5;
-    }
-    .tip-card strong { color: #E8B84B; }
-
-    .about-card {
-        background: #111118;
-        border: 1px solid #252535;
-        border-radius: 16px;
-        padding: 1.8rem;
-    }
-    .about-tag {
-        display: inline-block;
-        background: rgba(232,184,75,0.08);
-        border: 1px solid rgba(232,184,75,0.2);
-        color: #E8B84B;
-        border-radius: 6px;
-        padding: 3px 10px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        margin: 3px;
-    }
-
-    .perf-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-family: 'Plus Jakarta Sans', sans-serif;
-    }
-    .perf-table th {
-        background: #1E1E32;
-        color: #6666AA;
-        font-size: 0.72rem;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        padding: 10px 16px;
-        text-align: left;
-        border-bottom: 1px solid #252535;
-    }
-    .perf-table td {
-        padding: 14px 16px;
-        border-bottom: 1px solid #1A1A28;
-        font-size: 1.1rem;
-        font-weight: 700;
-        color: #E8B84B;
-    }
-    .perf-table tr:last-child td { border-bottom: none; }
-
-    .footer-bar {
-        background: #111118;
-        border: 1px solid #252535;
-        border-radius: 12px;
-        padding: 1rem 2rem;
-        text-align: center;
-        color: #44445A;
-        font-size: 0.78rem;
-        margin-top: 2rem;
-    }
-
-    [data-testid="stMetricValue"] { color: #E8B84B !important; font-family: 'Plus Jakarta Sans', sans-serif !important; }
-    [data-testid="stMetricLabel"] { color: #6666AA !important; }
+    }}
+    .result-label {{ font-size: 0.72rem; color: {SUBTEXT}; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 0.6rem; font-weight: 600; }}
+    .result-price {{ font-size: 2.6rem; font-weight: 800; color: {ACCENT}; line-height: 1; }}
+    .result-sub {{ font-size: 0.82rem; color: {SUBTEXT}; margin-top: 0.4rem; }}
+    .result-sub span {{ color: #71ef99; font-weight: 600; }}
+    .section-header {{
+        font-size: 1.1rem; font-weight: 700; color: #FFFFFF;
+        margin: 0 0 1rem 0; display: flex; align-items: center; gap: 8px;
+    }}
+    .section-header::after {{
+        content: ''; flex: 1; height: 1px;
+        background: linear-gradient(90deg, {BORDER}, transparent);
+    }}
+    .tip-card {{
+        background: {CARD}; border: 1px solid {BORDER};
+        border-left: 3px solid {ACCENT}; border-radius: 10px;
+        padding: 0.9rem 1.1rem; margin-bottom: 0.6rem;
+        font-size: 0.88rem; color: #AAAACC; line-height: 1.5;
+    }}
+    .tip-card strong {{ color: {ACCENT}; }}
+    .about-card {{ background: {CARD}; border: 1px solid {BORDER}; border-radius: 16px; padding: 1.8rem; }}
+    .about-tag {{
+        display: inline-block; background: rgba(232,184,75,0.08);
+        border: 1px solid rgba(232,184,75,0.2); color: {ACCENT};
+        border-radius: 6px; padding: 3px 10px; font-size: 0.75rem; font-weight: 600; margin: 3px;
+    }}
+    .perf-table {{ width: 100%; border-collapse: collapse; }}
+    .perf-table th {{
+        background: #1E1E32; color: {SUBTEXT}; font-size: 0.72rem;
+        text-transform: uppercase; letter-spacing: 1px;
+        padding: 10px 16px; text-align: left; border-bottom: 1px solid {BORDER};
+    }}
+    .perf-table td {{ padding: 12px 16px; border-bottom: 1px solid #1A1A28; font-size: 1rem; font-weight: 700; }}
+    .perf-table .val {{ color: {ACCENT}; }}
+    .perf-table .name {{ color: #AAAACC; font-weight: 500; font-size: 0.88rem; }}
+    .perf-table tr:last-child td {{ border-bottom: none; }}
+    .footer-bar {{
+        background: {CARD}; border: 1px solid {BORDER}; border-radius: 12px;
+        padding: 1rem 2rem; text-align: center; color: #44445A; font-size: 0.78rem; margin-top: 2rem;
+    }}
+    [data-testid="stMetricValue"] {{ color: {ACCENT} !important; }}
+    [data-testid="stMetricLabel"] {{ color: {SUBTEXT} !important; }}
+    /* Sidebar label styling */
+    .sidebar-label {{ font-size: 0.65rem; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: {SUBTEXT}; margin: 0.6rem 0 0.3rem 0; padding: 0 0.5rem; }}
     </style>
     """, unsafe_allow_html=True)
-
 else:
-    # LIGHT MODE
-    st.markdown("""
+    BG = "#F5F2ED"
+    CARD = "#FFFFFF"
+    BORDER = "#E8E2D9"
+    TEXT = "#1A1A2E"
+    SUBTEXT = "#999999"
+    st.markdown(f"""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
-
-    html, body, [class*="css"], p, div, span, label {
-        font-family: 'Plus Jakarta Sans', sans-serif !important;
-    }
-
-    .stApp {
-        background-color: #F5F2ED;
-        color: #1A1A2E;
-    }
-
-    section[data-testid="stSidebar"] {
-        background-color: #FFFFFF !important;
-        border-right: 1px solid #E8E2D9 !important;
-    }
-
-    [data-testid="stSidebarNav"] { display: none !important; }
-
-    div.stButton > button {
+    .stApp {{
+        background-color: {BG}; color: {TEXT};
+        font-family: -apple-system, 'Segoe UI', sans-serif;
+    }}
+    section[data-testid="stSidebar"] {{
+        background-color: {CARD} !important;
+        border-right: 1px solid {BORDER} !important;
+    }}
+    [data-testid="stSidebarNav"] {{ display: none !important; }}
+    /* Sidebar input labels - make visible in light mode */
+    section[data-testid="stSidebar"] label,
+    section[data-testid="stSidebar"] .stSelectbox label,
+    section[data-testid="stSidebar"] .stNumberInput label {{
+        color: #1A1A2E !important;
+        font-weight: 600 !important;
+        font-size: 0.88rem !important;
+    }}
+    div.stButton > button {{
         background: linear-gradient(135deg, #1A1A2E 0%, #2D2D5E 100%) !important;
-        color: #FFFFFF !important;
-        border: none !important;
-        border-radius: 10px !important;
-        font-family: 'Plus Jakarta Sans', sans-serif !important;
-        font-weight: 700 !important;
-        font-size: 0.95rem !important;
-        width: 100% !important;
+        color: #FFFFFF !important; border: none !important;
+        border-radius: 10px !important; font-weight: 700 !important;
+        font-size: 0.95rem !important; width: 100% !important;
         transition: all 0.2s ease !important;
         box-shadow: 0 4px 14px rgba(26,26,46,0.2) !important;
-    }
-    div.stButton > button:hover {
+    }}
+    div.stButton > button:hover {{
         transform: translateY(-2px) !important;
         box-shadow: 0 8px 24px rgba(26,26,46,0.3) !important;
-    }
-
-    [data-testid="stDownloadButton"] button {
-        background: #FFFFFF !important;
-        color: #1A1A2E !important;
-        border: 1.5px solid #1A1A2E !important;
-        border-radius: 10px !important;
-        font-family: 'Plus Jakarta Sans', sans-serif !important;
-        font-weight: 600 !important;
-        width: 100% !important;
+    }}
+    [data-testid="stDownloadButton"] button {{
+        background: {CARD} !important; color: {TEXT} !important;
+        border: 1.5px solid {TEXT} !important; border-radius: 10px !important;
+        font-weight: 600 !important; width: 100% !important;
         transition: all 0.2s ease !important;
-    }
-    [data-testid="stDownloadButton"] button:hover {
-        background: #1A1A2E !important;
-        color: white !important;
-    }
-
-    [data-testid="stSidebarNav"] { display: none !important; }
-
-    .hero-section {
+    }}
+    [data-testid="stDownloadButton"] button:hover {{
+        background: {TEXT} !important; color: white !important;
+    }}
+    .hero-section {{
         background: linear-gradient(135deg, #1A1A2E 0%, #2D2D5E 100%);
-        border-radius: 20px;
-        padding: 2.2rem 2.8rem;
-        margin-bottom: 1.5rem;
-        position: relative;
-        overflow: hidden;
-    }
-    .hero-section::after {
-        content: '';
-        position: absolute;
-        top: -40%;
-        right: -5%;
-        width: 350px;
-        height: 350px;
+        border-radius: 20px; padding: 2.2rem 2.8rem; margin-bottom: 1.5rem;
+        position: relative; overflow: hidden;
+    }}
+    .hero-section::after {{
+        content: ''; position: absolute; top: -40%; right: -5%;
+        width: 350px; height: 350px;
         background: radial-gradient(circle, rgba(232,184,75,0.1) 0%, transparent 70%);
         pointer-events: none;
-    }
-    .hero-title {
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        font-size: 2.6rem;
-        font-weight: 800;
-        color: #FFFFFF;
-        margin: 0;
-        line-height: 1.15;
-        letter-spacing: -0.5px;
-    }
-    .hero-accent { color: #E8B84B; }
-    .hero-sub {
-        font-size: 1rem;
-        color: rgba(255,255,255,0.55);
-        margin-top: 0.4rem;
-        font-weight: 400;
-    }
-    .hero-badge {
+    }}
+    .hero-title {{ font-size: 2.6rem; font-weight: 800; color: #FFFFFF; margin: 0; line-height: 1.15; }}
+    .hero-accent {{ color: {ACCENT}; }}
+    .hero-sub {{ font-size: 1rem; color: rgba(255,255,255,0.55); margin-top: 0.4rem; }}
+    .hero-badge {{
         display: inline-flex; align-items: center; gap: 6px;
-        background: rgba(232,184,75,0.15);
-        border: 1px solid rgba(232,184,75,0.4);
-        color: #E8B84B;
-        border-radius: 50px;
-        padding: 4px 14px;
-        font-size: 0.75rem;
-        font-weight: 700;
-        letter-spacing: 1px;
-        margin-bottom: 0.9rem;
-        text-transform: uppercase;
-    }
-
-    .kpi-card {
-        background: #FFFFFF;
-        border: 1px solid #E8E2D9;
-        border-radius: 14px;
-        padding: 1.3rem 1.4rem;
-        text-align: center;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        transition: all 0.2s;
-    }
-    .kpi-card:hover { border-color: #1A1A2E; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
-    .kpi-icon { font-size: 1.6rem; margin-bottom: 0.3rem; }
-    .kpi-value {
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        font-size: 1.6rem;
-        font-weight: 800;
-        color: #1A1A2E;
-        line-height: 1;
-    }
-    .kpi-label {
-        font-size: 0.72rem;
-        color: #999;
-        text-transform: uppercase;
-        letter-spacing: 0.8px;
-        margin-top: 4px;
-    }
-
-    .brand-card {
-        background: #FFFFFF;
-        border: 1px solid #E8E2D9;
-        border-radius: 14px;
-        padding: 1.2rem 1.5rem;
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        margin-bottom: 1rem;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    }
-    .brand-name {
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        font-size: 1.3rem;
-        font-weight: 700;
-        color: #1A1A2E;
-        margin: 0;
-    }
-    .brand-specs {
-        font-size: 0.82rem;
-        color: #999;
-        margin: 3px 0 0 0;
-    }
-
-    .result-card {
+        background: rgba(232,184,75,0.15); border: 1px solid rgba(232,184,75,0.4);
+        color: {ACCENT}; border-radius: 50px; padding: 4px 14px;
+        font-size: 0.75rem; font-weight: 700; letter-spacing: 1px;
+        margin-bottom: 0.9rem; text-transform: uppercase;
+    }}
+    .kpi-card {{
+        background: {CARD}; border: 1px solid {BORDER}; border-radius: 14px;
+        padding: 1.3rem 1.4rem; text-align: center;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05); transition: all 0.2s;
+    }}
+    .kpi-card:hover {{ border-color: {TEXT}; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }}
+    .kpi-value {{ font-size: 1.6rem; font-weight: 800; color: {TEXT}; line-height: 1; }}
+    .kpi-label {{ font-size: 0.72rem; color: {SUBTEXT}; text-transform: uppercase; letter-spacing: 0.8px; margin-top: 4px; }}
+    .result-card {{
         background: linear-gradient(145deg, #1A1A2E 0%, #2D2D5E 100%);
-        border-radius: 16px;
-        padding: 1.8rem;
-        text-align: center;
+        border-radius: 16px; padding: 1.8rem; text-align: center;
         box-shadow: 0 8px 28px rgba(26,26,46,0.2);
-        height: 100%;
-    }
-    .result-label {
-        font-size: 0.72rem;
-        color: rgba(255,255,255,0.5);
-        text-transform: uppercase;
-        letter-spacing: 1.2px;
-        margin-bottom: 0.6rem;
-        font-weight: 600;
-    }
-    .result-price {
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        font-size: 2.6rem;
-        font-weight: 800;
-        color: #E8B84B;
-        line-height: 1;
-    }
-    .result-sub {
-        font-size: 0.82rem;
-        color: rgba(255,255,255,0.4);
-        margin-top: 0.4rem;
-    }
-    .result-sub span { color: #71ef99; font-weight: 600; }
-
-    .section-header {
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        font-size: 1.1rem;
-        font-weight: 700;
-        color: #1A1A2E;
-        margin: 0 0 1rem 0;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-    .section-header::after {
-        content: '';
-        flex: 1;
-        height: 1px;
-        background: linear-gradient(90deg, #E8E2D9, transparent);
-    }
-
-    .tip-card {
-        background: #FFFFFF;
-        border: 1px solid #E8E2D9;
-        border-left: 3px solid #1A1A2E;
-        border-radius: 10px;
-        padding: 0.9rem 1.1rem;
-        margin-bottom: 0.6rem;
-        font-size: 0.88rem;
-        color: #555;
-        line-height: 1.5;
+    }}
+    .result-label {{ font-size: 0.72rem; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 0.6rem; font-weight: 600; }}
+    .result-price {{ font-size: 2.6rem; font-weight: 800; color: {ACCENT}; line-height: 1; }}
+    .result-sub {{ font-size: 0.82rem; color: rgba(255,255,255,0.4); margin-top: 0.4rem; }}
+    .result-sub span {{ color: #71ef99; font-weight: 600; }}
+    .section-header {{
+        font-size: 1.1rem; font-weight: 700; color: {TEXT};
+        margin: 0 0 1rem 0; display: flex; align-items: center; gap: 8px;
+    }}
+    .section-header::after {{
+        content: ''; flex: 1; height: 1px;
+        background: linear-gradient(90deg, {BORDER}, transparent);
+    }}
+    .tip-card {{
+        background: {CARD}; border: 1px solid {BORDER};
+        border-left: 3px solid {TEXT}; border-radius: 10px;
+        padding: 0.9rem 1.1rem; margin-bottom: 0.6rem;
+        font-size: 0.88rem; color: #555; line-height: 1.5;
         box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    }
-    .tip-card strong { color: #1A1A2E; }
-
-    .about-card {
-        background: #FFFFFF;
-        border: 1px solid #E8E2D9;
-        border-radius: 16px;
-        padding: 1.8rem;
+    }}
+    .tip-card strong {{ color: {TEXT}; }}
+    .about-card {{
+        background: {CARD}; border: 1px solid {BORDER};
+        border-radius: 16px; padding: 1.8rem;
         box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    }
-    .about-tag {
-        display: inline-block;
-        background: #F0EDE8;
-        border: 1px solid #E8E2D9;
-        color: #1A1A2E;
-        border-radius: 6px;
-        padding: 3px 10px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        margin: 3px;
-    }
-
-    .perf-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-family: 'Plus Jakarta Sans', sans-serif;
-    }
-    .perf-table th {
-        background: #F5F2ED;
-        color: #999;
-        font-size: 0.72rem;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        padding: 10px 16px;
-        text-align: left;
-        border-bottom: 1px solid #E8E2D9;
-    }
-    .perf-table td {
-        padding: 14px 16px;
-        border-bottom: 1px solid #F0EDE8;
-        font-size: 1.1rem;
-        font-weight: 700;
-        color: #1A1A2E;
-    }
-    .perf-table tr:last-child td { border-bottom: none; }
-
-    .footer-bar {
-        background: #FFFFFF;
-        border: 1px solid #E8E2D9;
-        border-radius: 12px;
-        padding: 1rem 2rem;
-        text-align: center;
-        color: #BBB;
-        font-size: 0.78rem;
-        margin-top: 2rem;
-    }
-
-    [data-testid="stMetricValue"] { color: #1A1A2E !important; font-family: 'Plus Jakarta Sans', sans-serif !important; }
-    [data-testid="stMetricLabel"] { color: #999 !important; }
+    }}
+    .about-tag {{
+        display: inline-block; background: #F0EDE8; border: 1px solid {BORDER};
+        color: {TEXT}; border-radius: 6px; padding: 3px 10px; font-size: 0.75rem; font-weight: 600; margin: 3px;
+    }}
+    .perf-table {{ width: 100%; border-collapse: collapse; }}
+    .perf-table th {{
+        background: {BG}; color: {SUBTEXT}; font-size: 0.72rem;
+        text-transform: uppercase; letter-spacing: 1px;
+        padding: 10px 16px; text-align: left; border-bottom: 1px solid {BORDER};
+    }}
+    .perf-table td {{ padding: 12px 16px; border-bottom: 1px solid #F0EDE8; font-size: 1rem; font-weight: 700; }}
+    .perf-table .val {{ color: {TEXT}; }}
+    .perf-table .name {{ color: #555; font-weight: 500; font-size: 0.88rem; }}
+    .perf-table tr:last-child td {{ border-bottom: none; }}
+    .footer-bar {{
+        background: {CARD}; border: 1px solid {BORDER}; border-radius: 12px;
+        padding: 1rem 2rem; text-align: center; color: #BBB; font-size: 0.78rem; margin-top: 2rem;
+    }}
+    [data-testid="stMetricValue"] {{ color: {TEXT} !important; }}
+    [data-testid="stMetricLabel"] {{ color: {SUBTEXT} !important; }}
     </style>
     """, unsafe_allow_html=True)
-
-# ── Load Model ────────────────────────────────────────────────────────────────
-with open("model.pkl", "rb") as f:
-    model = pickle.load(f)
-with open("scaler.pkl", "rb") as f:
-    scaler = pickle.load(f)
 
 # ── Brand Logos ───────────────────────────────────────────────────────────────
 brand_logos = {
@@ -613,27 +306,23 @@ brand_logos = {
 
 # ── Sidebar ───────────────────────────────────────────────────────────────────
 if logo_b64:
+    sidebar_name_color = "#E8B84B" if mode else "#1A1A2E"
     st.sidebar.markdown(
-        f"""<div style="text-align:center; padding:1rem 0 0.3rem 0;">
+        f"""<div style="text-align:center;padding:0.8rem 0 0.3rem 0;">
             <img src="data:image/png;base64,{logo_b64}"
-                 style="width:64px;height:64px;border-radius:50%;object-fit:cover;
+                 style="width:60px;height:60px;border-radius:50%;object-fit:cover;
                         box-shadow:0 4px 14px rgba(232,184,75,0.25);" />
-            <p style="margin:6px 0 0 0; font-family:'Plus Jakarta Sans',sans-serif;
-                      font-weight:800; font-size:0.95rem;
-                      color:{'#E8B84B' if mode else '#1A1A2E'};">RideRepublic</p>
+            <p style="margin:6px 0 0 0;font-weight:800;font-size:0.9rem;color:{sidebar_name_color};">
+                RideRepublic
+            </p>
         </div>""",
         unsafe_allow_html=True
     )
 
-st.sidebar.markdown(
-    f"<hr style='border:none;border-top:1px solid {'#252535' if mode else '#E8E2D9'};margin:0.4rem 0;'>",
-    unsafe_allow_html=True
-)
-st.sidebar.markdown(
-    f"<p style='font-size:0.65rem;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;"
-    f"color:{'#44445A' if mode else '#BBB'};margin:0.6rem 0 0.3rem 0;padding:0 0.5rem;'>Car Details</p>",
-    unsafe_allow_html=True
-)
+hr_color = "#252535" if mode else "#E8E2D9"
+label_color = "#6666AA" if mode else "#999999"
+st.sidebar.markdown(f"<hr style='border:none;border-top:1px solid {hr_color};margin:0.4rem 0;'>", unsafe_allow_html=True)
+st.sidebar.markdown(f"<p style='font-size:0.65rem;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:{label_color};margin:0.6rem 0 0.3rem 0;padding:0 0.3rem;'>Car Details</p>", unsafe_allow_html=True)
 
 brands = [
     "Nissan","Audi","Chevrolet","Ford","Honda","Hyundai",
@@ -662,10 +351,7 @@ fuel         = st.sidebar.selectbox("Fuel", ["Diesel","Petrol","LPG"], index=0, 
 transmission = st.sidebar.selectbox("Transmission", ["Manual","Automatic"], index=0, key=f"transmission_{rc}")
 seller_type  = st.sidebar.selectbox("Seller Type", ["Individual","Trustmark Dealer"], index=0, key=f"seller_{rc}")
 
-st.sidebar.markdown(
-    f"<hr style='border:none;border-top:1px solid {'#252535' if mode else '#E8E2D9'};margin:0.8rem 0 0.5rem 0;'>",
-    unsafe_allow_html=True
-)
+st.sidebar.markdown(f"<hr style='border:none;border-top:1px solid {hr_color};margin:0.8rem 0 0.5rem 0;'>", unsafe_allow_html=True)
 if st.sidebar.button("Reset Inputs"):
     st.session_state.reset_counter += 1
     st.rerun()
@@ -686,50 +372,46 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# ── KPI Cards ─────────────────────────────────────────────────────────────────
-col1, col2, col3, col4 = st.columns(4)
+# ── KPI Cards - removed Prediction Time ──────────────────────────────────────
+col1, col2, col3 = st.columns(3)
 kpis = [
-    ("AI", "82%", "Model Accuracy"),
-    ("CAR", "14+", "Car Brands"),
-    ("DATA", "8K+", "Cars Trained On"),
-    ("SPEED", "<1s", "Prediction Time"),
+    ("82%", "Model Accuracy"),
+    ("14+", "Car Brands"),
+    ("8,000+", "Cars Trained On"),
 ]
-icons_map = {"AI": "&#129302;", "CAR": "&#128663;", "DATA": "&#128202;", "SPEED": "&#9889;"}
-for col, (key, val, label) in zip([col1,col2,col3,col4], kpis):
+for col, (val, label) in zip([col1, col2, col3], kpis):
     with col:
         st.markdown(f"""
         <div class="kpi-card">
-            <div class="kpi-icon">{icons_map[key]}</div>
             <div class="kpi-value">{val}</div>
             <div class="kpi-label">{label}</div>
         </div>""", unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# ── Brand Display Card ────────────────────────────────────────────────────────
+# ── Brand Display ─────────────────────────────────────────────────────────────
 if brand in brand_logos:
     bcol1, bcol2 = st.columns([1, 5])
     with bcol1:
         st.image(brand_logos[brand], width=90)
     with bcol2:
         brand_info = str(year) + "  |  " + fuel + "  |  " + transmission + "  |  " + owner_label
+        name_c = "#FFFFFF" if mode else "#1A1A2E"
+        spec_c = "#6666AA" if mode else "#999999"
         st.markdown(f"""
         <div style="padding:0.8rem 0;">
-            <p class="brand-name">{brand}</p>
-            <p class="brand-specs">{brand_info}</p>
+            <p style="font-size:1.3rem;font-weight:700;color:{name_c};margin:0;">{brand}</p>
+            <p style="font-size:0.82rem;color:{spec_c};margin:3px 0 0 0;">{brand_info}</p>
         </div>""", unsafe_allow_html=True)
 
 # ── Predict Button ────────────────────────────────────────────────────────────
 st.markdown("<p class='section-header'>Valuation Engine</p>", unsafe_allow_html=True)
-
 pcol, _ = st.columns([1, 2])
 with pcol:
     predict_btn = st.button("Predict Resale Price", use_container_width=True)
 
 if predict_btn:
     with st.spinner("Analyzing market data..."):
-        time.sleep(0.5)
-
         input_df = pd.DataFrame(columns=model.feature_names_in_)
         input_df.loc[0] = 0
         input_df.at[0,'year'] = year
@@ -738,17 +420,14 @@ if predict_btn:
         input_df.at[0,'engine'] = engine
         input_df.at[0,'seats'] = seats
         input_df.at[0,'owner'] = owner
-
         for col_name, val in [
             (f"brand_{brand}", 1), (f"fuel_{fuel}", 1),
             (f"transmission_{transmission}", 1), (f"seller_type_{seller_type}", 1)
         ]:
             if col_name in input_df.columns:
                 input_df.at[0, col_name] = val
-
         numeric_cols = ['year','km_driven','mileage(km/ltr/kg)','engine','seats']
         input_df[numeric_cols] = scaler.transform(input_df[numeric_cols])
-
         y_log  = model.predict(input_df)
         price  = round(np.exp(y_log)[0], 0)
         low    = round(price * 0.9)
@@ -758,14 +437,12 @@ if predict_btn:
         high_lakh  = high / 100000
         age        = 2026 - year
         dep_pct    = round((1 - (0.9**5)) * 100, 1)
-
         dep_years  = [year + i for i in range(6)]
         dep_prices = [price * (0.9 ** i) for i in range(6)]
         dep_df     = pd.DataFrame({"Year": dep_years, "Estimated Value": dep_prices})
 
         st.markdown("<br>", unsafe_allow_html=True)
 
-        # Result cards
         r1, r2, r3 = st.columns(3)
         with r1:
             st.markdown(f"""
@@ -791,32 +468,30 @@ if predict_btn:
 
         st.markdown("<br>", unsafe_allow_html=True)
 
-        # Gauge + Depreciation
         g1, g2 = st.columns([1, 2])
         with g1:
             fig_gauge = go.Figure(go.Indicator(
                 mode="gauge+number",
                 value=price_lakh,
                 number={'prefix': "Rs.", 'suffix': " L", 'valueformat': '.2f',
-                        'font': {'size': 26, 'color': ACCENT}},
-                title={'text': "Market Value (Lakhs)", 'font': {'size': 13, 'color': '#888'}},
+                        'font': {'size': 24, 'color': ACCENT}},
+                title={'text': "Market Value (Lakhs)", 'font': {'size': 12, 'color': '#888'}},
                 gauge={
                     'axis': {'range': [0, 50], 'tickcolor': '#444'},
                     'bar': {'color': ACCENT, 'thickness': 0.22},
                     'bgcolor': 'rgba(0,0,0,0)',
                     'bordercolor': 'rgba(0,0,0,0)',
                     'steps': [
-                        {'range': [0, 15], 'color': 'rgba(255,107,107,0.12)'},
-                        {'range': [15, 30], 'color': 'rgba(232,184,75,0.08)'},
-                        {'range': [30, 50], 'color': 'rgba(113,239,153,0.08)'},
+                        {'range': [0, 15], 'color': 'rgba(255,107,107,0.1)'},
+                        {'range': [15, 30], 'color': 'rgba(232,184,75,0.07)'},
+                        {'range': [30, 50], 'color': 'rgba(113,239,153,0.07)'},
                     ],
                 }
             ))
             fig_gauge.update_layout(
-                paper_bgcolor='rgba(0,0,0,0)',
-                plot_bgcolor='rgba(0,0,0,0)',
-                height=250, margin=dict(t=30, b=0, l=20, r=20),
-                font={'color': '#888', 'family': 'Plus Jakarta Sans'}
+                paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+                height=240, margin=dict(t=30, b=0, l=20, r=20),
+                font={'color': '#888'}
             )
             st.plotly_chart(fig_gauge, use_container_width=True)
 
@@ -835,19 +510,15 @@ if predict_btn:
                 hovertemplate="Year: %{y}<br>Value: Rs.%{x:.2f}L<extra></extra>"
             ))
             fig_dep.update_layout(
-                paper_bgcolor='rgba(0,0,0,0)',
-                plot_bgcolor='rgba(0,0,0,0)',
-                height=250,
-                margin=dict(t=10, b=10, l=10, r=20),
-                xaxis=dict(title="Rs. Lakhs", color='#888', gridcolor='rgba(128,128,128,0.1)',
-                           tickfont=dict(family='Plus Jakarta Sans')),
-                yaxis=dict(color='#888', gridcolor='rgba(0,0,0,0)',
-                           tickfont=dict(family='Plus Jakarta Sans')),
-                font={'family': 'Plus Jakarta Sans'}
+                paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+                height=240, margin=dict(t=10, b=10, l=10, r=20),
+                xaxis=dict(title="Rs. Lakhs", color='#888', gridcolor='rgba(128,128,128,0.1)'),
+                yaxis=dict(color='#888', gridcolor='rgba(0,0,0,0)'),
+                font={'color': '#888'}
             )
             st.plotly_chart(fig_dep, use_container_width=True)
 
-        # PDF Download - no None boxes, just clean button
+        # ── PDF Download - clean single button, no None boxes ─────────────────
         st.markdown("<br>", unsafe_allow_html=True)
         st.markdown("<p class='section-header'>Valuation Report</p>", unsafe_allow_html=True)
 
@@ -971,7 +642,7 @@ if predict_btn:
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# ── Tips Section ──────────────────────────────────────────────────────────────
+# ── Tips ──────────────────────────────────────────────────────────────────────
 st.markdown("<p class='section-header'>Tips To Maintain Resale Value</p>", unsafe_allow_html=True)
 tips_data = [
     ("Regular Servicing", "Maintain proper service records to build buyer trust."),
@@ -985,26 +656,24 @@ for i, (title, desc) in enumerate(tips_data):
     col = tc1 if i % 2 == 0 else tc2
     with col:
         st.markdown(f"""
-        <div class="tip-card">
-            <strong>{title}:</strong> {desc}
-        </div>""", unsafe_allow_html=True)
+        <div class="tip-card"><strong>{title}:</strong> {desc}</div>""",
+        unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# ── About Section ─────────────────────────────────────────────────────────────
+# ── About ─────────────────────────────────────────────────────────────────────
 st.markdown("<p class='section-header'>About RideRepublic</p>", unsafe_allow_html=True)
-
 ac1, ac2 = st.columns([3, 2])
 with ac1:
-    st.markdown("""
+    txt_opacity = "0.75"
+    st.markdown(f"""
     <div class="about-card">
-        <p style="line-height:1.8; opacity:0.75; margin:0 0 1rem 0; font-size:0.92rem;">
+        <p style="line-height:1.8;opacity:{txt_opacity};margin:0 0 1rem 0;font-size:0.92rem;">
             RideRepublic is an AI-powered car valuation platform that estimates the resale price
             of used cars based on key vehicle attributes. Built as a final year ML project, it
             demonstrates end-to-end machine learning from data preprocessing to live deployment.
         </p>
-        <p style="font-weight:700; margin:0 0 0.6rem 0; opacity:0.5; font-size:0.7rem;
-                  text-transform:uppercase; letter-spacing:1.2px;">Model Inputs</p>
+        <p style="font-weight:700;margin:0 0 0.6rem 0;opacity:0.5;font-size:0.7rem;text-transform:uppercase;letter-spacing:1.2px;">Model Inputs</p>
         <div>
             <span class="about-tag">Year</span>
             <span class="about-tag">KM Driven</span>
@@ -1015,52 +684,34 @@ with ac1:
             <span class="about-tag">Brand</span>
             <span class="about-tag">Ownership</span>
         </div>
-    </div>
-    """, unsafe_allow_html=True)
+    </div>""", unsafe_allow_html=True)
 
 with ac2:
-    border_c = "#252535" if mode else "#E8E2D9"
-    bg_c = "#111118" if mode else "#FFFFFF"
-    th_bg = "#1E1E32" if mode else "#F5F2ED"
-    td_c = "#E8B84B" if mode else "#1A1A2E"
-    text_c = "#E2E2EE" if mode else "#1A1A2E"
+    val_c  = "#E8B84B" if mode else "#1A1A2E"
+    name_c = "#AAAACC" if mode else "#555555"
     st.markdown(f"""
     <div class="about-card">
-        <p style="font-weight:700; margin:0 0 1rem 0; font-family:'Plus Jakarta Sans',sans-serif;
-                  font-size:0.95rem;">Model Performance</p>
+        <p style="font-weight:700;margin:0 0 1rem 0;font-size:0.95rem;">Model Performance</p>
         <table class="perf-table">
-            <thead>
-                <tr>
-                    <th>Metric</th>
-                    <th>Score</th>
-                </tr>
-            </thead>
+            <thead><tr><th>Metric</th><th>Value</th></tr></thead>
             <tbody>
-                <tr><td style="color:{text_c};font-weight:500;font-size:0.88rem;">Train R2 Score</td>
-                    <td style="color:{td_c};">0.83</td></tr>
-                <tr><td style="color:{text_c};font-weight:500;font-size:0.88rem;">Test R2 Score</td>
-                    <td style="color:{td_c};">0.82</td></tr>
-                <tr><td style="color:{text_c};font-weight:500;font-size:0.88rem;">MAE</td>
-                    <td style="color:{td_c};">Rs. 77,695</td></tr>
-                <tr><td style="color:{text_c};font-weight:500;font-size:0.88rem;">RMSE</td>
-                    <td style="color:{td_c};">Rs. 1,06,605</td></tr>
+                <tr><td class="name">Train R2 Score</td><td class="val">0.83</td></tr>
+                <tr><td class="name">Test R2 Score</td><td class="val">0.82</td></tr>
+                <tr><td class="name">MAE</td><td class="val">Rs. 77,695</td></tr>
+                <tr><td class="name">RMSE</td><td class="val">Rs. 1,06,605</td></tr>
             </tbody>
         </table>
-    </div>
-    """, unsafe_allow_html=True)
+    </div>""", unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# ── Analytics CTA ─────────────────────────────────────────────────────────────
 cta_col, _ = st.columns([1, 2])
 with cta_col:
     if st.button("Open Analytics Dashboard"):
         st.switch_page("pages/analytics.py")
 
-# ── Footer ────────────────────────────────────────────────────────────────────
 st.markdown("""
 <div class="footer-bar">
-    RideRepublic 2026 &nbsp;&nbsp;Python &nbsp;&nbsp; Scikit-Learn &nbsp;&nbsp;
-    Streamlit &nbsp;&nbsp; Plotly &nbsp;&nbsp; FPDF2
+    RideRepublic 2026 &nbsp;&nbsp; Python &nbsp;&nbsp; Scikit-Learn &nbsp;&nbsp; Streamlit &nbsp;&nbsp; Plotly &nbsp;&nbsp; FPDF2
 </div>
 """, unsafe_allow_html=True)
