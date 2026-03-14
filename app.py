@@ -357,7 +357,7 @@ st.write("")
 if brand in brand_logos:
     bcol1, bcol2 = st.columns([1, 5])
     with bcol1:
-        st.image(brand_logos[brand], width=90)
+        st.image(brand_logos[brand], width=135)
     brand_info = f"{year}  |  {fuel}  |  {transmission}  |  {owner_label}"
     name_c = "#FFFFFF" if mode else "#1A1A2E"
     spec_c = "#6666AA" if mode else "#999999"
