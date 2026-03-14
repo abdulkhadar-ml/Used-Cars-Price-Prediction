@@ -3,7 +3,6 @@ import pandas as pd
 import numpy as np
 import pickle
 import plotly.graph_objects as go
-import streamlit_antd_components as sac
 import base64
 from fpdf import FPDF
 import tempfile
@@ -528,8 +527,7 @@ if predict_btn:
             st.plotly_chart(fig_dep, use_container_width=True)
 
         # ── PDF Download ──────────────────────────────────────────────────────
-        st.write("")
-        st.write("**Valuation Report**")
+        st.markdown("### Valuation Report")
 
         def generate_pdf(brand, year, km_driven, mileage, engine, seats,
                          owner_label, fuel, transmission, seller_type,
