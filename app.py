@@ -43,7 +43,7 @@ if "dark_mode" not in st.session_state:
     st.session_state.dark_mode = False
 
 with st.sidebar:
-    toggle_label = "🌙 Dark Mode" if not st.session_state.dark_mode else "☀️ Light Mode"
+    toggle_label = "🌙 Light Mode" if not st.session_state.dark_mode else "☀️ Dark Mode"
     if st.sidebar.button(toggle_label, key="theme_toggle"):
         st.session_state.dark_mode = not st.session_state.dark_mode
         st.rerun()
