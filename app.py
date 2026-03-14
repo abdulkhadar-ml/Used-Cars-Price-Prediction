@@ -28,7 +28,7 @@ def get_logo_base64(path="riderepublic_logo.png"):
 logo_b64 = get_logo_base64()
 
 with st.sidebar:
-    mode = sac.switch(label='Theme', align='start', size='md', on_label='Moon', off_label='Sun')
+    mode = sac.switch(label='Theme', align='start', size='md', on_label='🌙', off_label='☀️')
 
 ACCENT = "#E8B84B"
 ACCENT2 = "#FF6B6B"
