@@ -92,12 +92,12 @@ div.stButton > button:hover {{
 .hero-section {{
     background: linear-gradient(135deg, #111122 0%, #1A1A3A 100%);
     border: 1px solid #2A2A45; border-radius: 20px;
-    padding: 2.2rem 2.8rem; margin-bottom: 1.5rem;
+    padding: clamp(1rem, 4vw, 2.2rem) clamp(1rem, 4vw, 2.8rem); margin-bottom: 1.5rem;
     position: relative; overflow: hidden;
 }}
-.hero-title {{ font-size: 2.6rem; font-weight: 800; color: #FFFFFF; margin: 0; line-height: 1.15; }}
+.hero-title {{ font-size: clamp(1.4rem, 5vw, 2.6rem); font-weight: 800; color: #FFFFFF; margin: 0; line-height: 1.15; }}
 .hero-accent {{ color: #E8B84B; }}
-.hero-sub {{ font-size: 1rem; color: rgba(255,255,255,0.5); margin-top: 0.4rem; }}
+.hero-sub {{ font-size: clamp(0.8rem, 3vw, 1rem); color: rgba(255,255,255,0.5); margin-top: 0.4rem; }}
 .hero-badge {{
     display: inline-flex; align-items: center;
     background: rgba(232,184,75,0.1); border: 1px solid rgba(232,184,75,0.25);
@@ -192,10 +192,10 @@ div.stButton > button:hover {{
 }}
 .hero-section {{
     background: linear-gradient(135deg, #111122 0%, #1A1A3A 100%);
-    border-radius: 20px; padding: 2.2rem 2.8rem; margin-bottom: 1.5rem;
+    border-radius: 20px; padding: clamp(1rem, 4vw, 2.2rem) clamp(1rem, 4vw, 2.8rem); margin-bottom: 1.5rem;
     position: relative; overflow: hidden;
 }}
-.hero-title {{ font-size: 2.6rem; font-weight: 800; color: #FFFFFF; margin: 0; line-height: 1.15; }}
+.hero-title {{ font-size: clamp(1.4rem, 5vw, 2.6rem); font-weight: 800; color: #FFFFFF; margin: 0; line-height: 1.15; }}
 .hero-accent {{ color: #E8B84B; }}
 .hero-sub {{ font-size: 1rem; color: rgba(255,255,255,0.55); margin-top: 0.4rem; }}
 .hero-badge {{
@@ -276,7 +276,7 @@ if logo_b64:
     st.sidebar.markdown(
         f'<div style="text-align:center;padding:0.8rem 0 0.3rem 0;">'
         f'<img src="data:image/png;base64,{logo_b64}" '
-        f'style="width:90px;height:90px;border-radius:50%;object-fit:cover;'
+        f'style="width:60px;height:60px;border-radius:50%;object-fit:cover;'
         f'box-shadow:0 4px 14px rgba(232,184,75,0.25);" />'
         f'<p style="margin:6px 0 0 0;font-weight:800;font-size:0.9rem;color:{name_color};">'
         f'RideRepublic</p></div>',
@@ -299,8 +299,8 @@ if "reset_counter" not in st.session_state:
 rc = st.session_state.reset_counter
 
 brand        = st.sidebar.selectbox("Brand", brands, index=0, key=f"brand_{rc}")
-year         = st.sidebar.number_input("Year", 1990, 2026, 2018, key=f"year_{rc}")
-km_driven    = st.sidebar.number_input("KM Driven", 0, 300000, 10000, key=f"km_{rc}")
+year         = st.sidebar.number_input("Year", 2000, 2026, 2018, key=f"year_{rc}")
+km_driven    = st.sidebar.number_input("KM Driven", 0, 300000, 40000, key=f"km_{rc}")
 mileage      = st.sidebar.number_input("Mileage (km/l)", 5.0, 40.0, 18.0, key=f"mileage_{rc}")
 engine       = st.sidebar.number_input("Engine (CC)", 800, 5000, 1500, key=f"engine_{rc}")
 seats        = st.sidebar.number_input("Seats", 2, 10, 5, key=f"seats_{rc}")
@@ -322,11 +322,11 @@ if st.sidebar.button("Reset Inputs"):
 logo_img = ""
 if logo_b64:
     logo_img = (f'<img src="data:image/png;base64,{logo_b64}" '
-                f'style="width:90px;height:90px;border-radius:50%;object-fit:cover;" />')
+                f'style="width:50px;height:50px;border-radius:50%;object-fit:cover;" />')
 
 st.markdown(
     f'<div class="hero-section">'
-    f'<div style="display:flex;align-items:center;gap:18px;">'
+    f'<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">'
     f'<div>{logo_img}</div>'
     f'<div>'
     f'<div class="hero-badge">AI-POWERED VALUATION</div>'
@@ -357,7 +357,7 @@ st.write("")
 if brand in brand_logos:
     bcol1, bcol2 = st.columns([1, 5])
     with bcol1:
-        st.image(brand_logos[brand], width=135)
+        st.image(brand_logos[brand], width=90)
     brand_info = f"{year}  |  {fuel}  |  {transmission}  |  {owner_label}"
     name_c = "#FFFFFF" if mode else "#1A1A2E"
     spec_c = "#6666AA" if mode else "#999999"
@@ -374,9 +374,6 @@ st.subheader("Valuation Engine")
 pcol, _ = st.columns([1, 2])
 with pcol:
     predict_btn = st.button("Predict Resale Price", use_container_width=True)
-
-
-
 # ── PDF Generator ─────────────────────────────────────────────────────────────
 def generate_pdf(brand, year, km_driven, mileage, engine, seats,
                  owner_label, fuel, transmission, seller_type,
@@ -465,7 +462,7 @@ def generate_pdf(brand, year, km_driven, mileage, engine, seats,
     tips = [
         "Regular Servicing: Maintain proper service records to build buyer trust.",
         "Low Mileage: Cars with lower mileage usually sell at higher prices.",
-        "Clean Interior & Exterior: A well-maintained car attracts better.",
+        "Clean Interior & Exterior: A well-maintained car attracts better resale offers.",
         "Accident-Free Record: Vehicles without accident history maintain higher value.",
         "Original Parts: Avoid replacing parts with non-genuine components.",
     ]
@@ -706,7 +703,7 @@ with cta_col2:
 # ── Footer ────────────────────────────────────────────────────────────────────
 st.markdown(
     '<div class="footer-bar">'
-    'RideRepublic © 2026 &nbsp;&nbsp; Python &nbsp;&nbsp; Scikit-Learn &nbsp;&nbsp;'
+    'RideRepublic 2026 &nbsp;&nbsp; Python &nbsp;&nbsp; Scikit-Learn &nbsp;&nbsp;'
     ' Streamlit &nbsp;&nbsp; Plotly &nbsp;&nbsp; FPDF2'
     '</div>',
     unsafe_allow_html=True
