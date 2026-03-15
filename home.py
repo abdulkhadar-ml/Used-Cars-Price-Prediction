@@ -47,10 +47,11 @@ div.stButton > button {
     background: linear-gradient(135deg, #E8B84B 0%, #D4A43A 100%) !important;
     color: #0D0D14 !important; border: none !important;
     border-radius: 12px !important; font-weight: 700 !important;
-    font-size: 1.1rem !important; width: 100% !important;
-    padding: 0.8rem 2rem !important;
+    font-size: 1.15rem !important; width: 100% !important;
+    padding: 1rem 2rem !important;
     transition: all 0.2s ease !important;
     box-shadow: 0 4px 18px rgba(232,184,75,0.35) !important;
+    letter-spacing: 0.3px !important;
 }
 div.stButton > button:hover {
     transform: translateY(-3px) !important;
@@ -160,10 +161,11 @@ div.stButton > button {
     background: linear-gradient(135deg, #1A1A2E 0%, #2D2D5E 100%) !important;
     color: #FFFFFF !important; border: none !important;
     border-radius: 12px !important; font-weight: 700 !important;
-    font-size: 1.1rem !important; width: 100% !important;
-    padding: 0.8rem 2rem !important;
+    font-size: 1.15rem !important; width: 100% !important;
+    padding: 1rem 2rem !important;
     transition: all 0.2s ease !important;
     box-shadow: 0 4px 14px rgba(26,26,46,0.2) !important;
+    letter-spacing: 0.3px !important;
 }
 div.stButton > button:hover {
     transform: translateY(-3px) !important;
@@ -332,9 +334,9 @@ st.markdown(
 )
 
 # ── Get Started Button ────────────────────────────────────────────────────────
-_, btn_col, _ = st.columns([1, 2, 1])
+_, btn_col, _ = st.columns([1, 3, 1])
 with btn_col:
-    if st.button("Get Started - Predict Now", use_container_width=True):
+    if st.button("🚗  Get Started - Predict Now  →", use_container_width=True):
         st.switch_page("pages/app.py")
 
 st.write("")
