@@ -336,7 +336,7 @@ st.markdown(hero_html, unsafe_allow_html=True)
 # ── Get Started Button ────────────────────────────────────────────────────────
 _, btn_col, _ = st.columns([1, 3, 1])
 with btn_col:
-    if st.button("🚗  Get Started - Predict Now  →", use_container_width=True):
+    if st.button("GET STARTED", use_container_width=True):
         st.switch_page("pages/app.py")
 
 st.write("")
