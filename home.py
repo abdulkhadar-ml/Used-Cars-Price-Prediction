@@ -290,7 +290,7 @@ st.markdown(
     f'<h2 style="font-size:clamp(1rem,3vw,1.6rem);font-weight:700;color:rgba(255,255,255,0.85);margin:0 0 0.8rem 0;line-height:1.3;">Know Your Car\'s <span style="color:#E8B84B;">True Value</span> Instantly</h2>'
     f'<p class="hero-sub">Predict your used car\'s resale price using Machine Learning. Accurate, fast and completely free.</p>'
     f'</div>'
-    f'<div class="hero-right"><img src="data:image/png;base64,{car_img_b64}" class="car-img" /></div>'
+    f'<div class="hero-right"><img src="data:image/png;base64,{car_hero}" class="car-img" /></div>'
     f'</div>'
     f'</div>',
     unsafe_allow_html=True
