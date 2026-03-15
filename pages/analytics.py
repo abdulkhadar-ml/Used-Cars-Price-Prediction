@@ -28,7 +28,7 @@ with st.sidebar:
     if st.sidebar.button("Back to Prediction"):
         st.switch_page("pages/app.py")
     if st.sidebar.button("Home"):
-        st.switch_page("Home.py")
+        st.switch_page("home.py")
 
 mode = st.session_state.dark_mode
 ACCENT = "#E8B84B"
