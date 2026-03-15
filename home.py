@@ -285,17 +285,36 @@ car_html = f'<img src="data:image/png;base64,{car_b64}" class="car-img" />' if c
 car_src = f"data:image/png;base64,{car_b64}" if car_b64 else ""
 
 hero_html = f"""
-<div style="background:linear-gradient(135deg,#0A1F10 0%,#1A3A22 60%,#0F2018 100%);
-     border-radius:24px;margin-bottom:1.5rem;border:1px solid #1E4A2A;
-     display:flex;align-items:center;justify-content:space-between;
-     min-height:380px;overflow:hidden;">
-  <div style="padding:clamp(1.5rem,4vw,3rem);flex:1;min-width:0;z-index:2;">
+<div style="position:relative;border-radius:24px;overflow:hidden;
+     margin-bottom:1.5rem;min-height:420px;border:1px solid #1E4A2A;">
+
+  <!-- Background car image -->
+  <img src="{car_src}" style="
+       position:absolute;top:0;left:0;
+       width:100%;height:100%;
+       object-fit:cover;object-position:right center;
+       display:block;z-index:0;" />
+
+  <!-- Dark gradient overlay left to right -->
+  <div style="position:absolute;top:0;left:0;width:100%;height:100%;
+       background:linear-gradient(90deg,
+         rgba(5,18,8,0.97) 0%,
+         rgba(5,18,8,0.92) 35%,
+         rgba(5,18,8,0.55) 65%,
+         rgba(5,18,8,0.0) 100%);
+       z-index:1;"></div>
+
+  <!-- Content on top -->
+  <div style="position:relative;z-index:2;
+       padding:clamp(2rem,5vw,3.5rem);
+       max-width:55%;min-height:420px;
+       display:flex;flex-direction:column;justify-content:center;">
     {logo_img}
     <div style="display:inline-flex;background:rgba(232,184,75,0.15);
          border:1px solid rgba(232,184,75,0.4);color:#E8B84B;
          border-radius:50px;padding:5px 16px;font-size:0.75rem;
          font-weight:700;letter-spacing:1.5px;margin-bottom:1rem;
-         text-transform:uppercase;">AI-POWERED CAR VALUATION</div>
+         text-transform:uppercase;width:fit-content;">AI-POWERED CAR VALUATION</div>
     <h1 style="font-size:clamp(2rem,5vw,3.5rem);font-weight:900;
          color:#FFFFFF;margin:0 0 0.3rem 0;letter-spacing:-1px;line-height:1.1;">
       Ride<span style="color:#E8B84B;">Republic</span>
@@ -304,17 +323,11 @@ hero_html = f"""
          color:rgba(255,255,255,0.9);margin:0 0 0.8rem 0;line-height:1.3;">
       Know Your Car's <span style="color:#E8B84B;">True Value</span> Instantly
     </h2>
-    <p style="font-size:clamp(0.85rem,2vw,1rem);color:rgba(255,255,255,0.6);
-         line-height:1.7;margin:0;max-width:420px;">
+    <p style="font-size:clamp(0.85rem,2vw,1rem);color:rgba(255,255,255,0.65);
+         line-height:1.7;margin:0;max-width:400px;">
       Predict your used car's resale price using Machine Learning.
       Accurate, fast and completely free.
     </p>
-  </div>
-  <div style="flex:1;display:flex;align-items:flex-end;
-       justify-content:flex-end;padding:0;margin:0;min-width:0;">
-    <img src="{car_src}" style="width:100%;max-width:500px;
-         object-fit:contain;object-position:right bottom;
-         display:block;" />
   </div>
 </div>
 """
