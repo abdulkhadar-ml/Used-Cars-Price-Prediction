@@ -1,4 +1,4 @@
-import streamlit as st
+mport streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -28,7 +28,7 @@ with st.sidebar:
     if st.sidebar.button("Back to Prediction"):
         st.switch_page("pages/app.py")
     if st.sidebar.button("Home"):
-        st.switch_page("home.py")
+        st.switch_page("Home.py")
 
 mode = st.session_state.dark_mode
 ACCENT = "#E8B84B"
