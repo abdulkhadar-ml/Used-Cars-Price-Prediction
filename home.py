@@ -402,7 +402,7 @@ st.markdown(
 # ── Footer ────────────────────────────────────────────────────────────────────
 st.markdown(
     '<div class="footer-bar">'
-    'RideRepublic © &copy; 2026 &nbsp;&nbsp; Python &nbsp;&nbsp; Scikit-Learn &nbsp;&nbsp; Streamlit &nbsp;&nbsp; Plotly'
+    'RideRepublic &copy; 2026 &nbsp;&nbsp; Python &nbsp;&nbsp; Scikit-Learn &nbsp;&nbsp; Streamlit &nbsp;&nbsp; Plotly'
     '</div>',
     unsafe_allow_html=True
 )
