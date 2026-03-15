@@ -324,6 +324,7 @@ st.markdown(
     f'<div class="hero-left">'
     f'{logo_img}'
     f'<div class="hero-badge">AI-POWERED CAR VALUATION</div>'
+    f'<p style="font-size:clamp(1.3rem,4vw,2rem);font-weight:800;color:#FFFFFF;margin:0 0 0.3rem 0;">Ride<span style="color:#E8B84B;">Republic</span></p>'
     f'<h1 class="hero-title">Know Your Car\'s<br><span>True Value</span> Instantly</h1>'
     f'<p class="hero-sub">Predict your used car\'s resale price instantly using Machine Learning. Accurate, fast and completely free.</p>'
     f'</div>'
