@@ -17,6 +17,15 @@ def get_logo_base64(path="riderepublic_logo.png"):
 
 logo_b64 = get_logo_base64()
 
+def get_car_base64(path="car_hero.png"):
+    try:
+        with open(path, "rb") as f:
+            return base64.b64encode(f.read()).decode()
+    except:
+        return None
+
+car_b64 = get_car_base64()
+
 # ── Theme Toggle ──────────────────────────────────────────────────────────────
 if "dark_mode" not in st.session_state:
     st.session_state.dark_mode = False
@@ -47,21 +56,22 @@ div.stButton > button {
     background: linear-gradient(135deg, #E8B84B 0%, #D4A43A 100%) !important;
     color: #0D0D14 !important; border: none !important;
     border-radius: 12px !important; font-weight: 700 !important;
-    font-size: 1.15rem !important; width: 100% !important;
+    font-size: 1.2rem !important; width: 100% !important;
     padding: 1rem 2rem !important;
     transition: all 0.2s ease !important;
     box-shadow: 0 4px 18px rgba(232,184,75,0.35) !important;
-    letter-spacing: 0.3px !important;
+    letter-spacing: 1px !important;
+    text-transform: uppercase !important;
 }
 div.stButton > button:hover {
     transform: translateY(-3px) !important;
     box-shadow: 0 10px 28px rgba(232,184,75,0.55) !important;
 }
 .hero-wrap {
-    background: linear-gradient(135deg, #111122 0%, #1A1A3A 100%);
+    background: linear-gradient(135deg, #0D2015 0%, #1A3A25 50%, #0F1A28 100%);
     border-radius: 24px; margin-bottom: 3rem;
-    border: 1px solid #2A2A45; position: relative; overflow: hidden;
-    min-height: 320px;
+    border: 1px solid #1E4A2A; position: relative; overflow: hidden;
+    min-height: 380px;
 }
 .hero-left {
     padding: clamp(2rem, 5vw, 3.5rem);
@@ -96,7 +106,7 @@ div.stButton > button:hover {
     line-height: 1.7; margin-bottom: 0; max-width: 480px;
 }
 .car-img {
-    width: 100%; max-width: 420px; filter: drop-shadow(0 20px 40px rgba(232,184,75,0.2));
+    width: 100%; max-width: 500px; filter: drop-shadow(0 25px 50px rgba(232,184,75,0.35));
 }
 .features-grid {
     display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -161,20 +171,21 @@ div.stButton > button {
     background: linear-gradient(135deg, #1A1A2E 0%, #2D2D5E 100%) !important;
     color: #FFFFFF !important; border: none !important;
     border-radius: 12px !important; font-weight: 700 !important;
-    font-size: 1.15rem !important; width: 100% !important;
+    font-size: 1.2rem !important; width: 100% !important;
     padding: 1rem 2rem !important;
     transition: all 0.2s ease !important;
     box-shadow: 0 4px 14px rgba(26,26,46,0.2) !important;
-    letter-spacing: 0.3px !important;
+    letter-spacing: 1px !important;
+    text-transform: uppercase !important;
 }
 div.stButton > button:hover {
     transform: translateY(-3px) !important;
     box-shadow: 0 10px 28px rgba(26,26,46,0.35) !important;
 }
 .hero-wrap {
-    background: linear-gradient(135deg, #111122 0%, #1A1A3A 100%);
+    background: linear-gradient(135deg, #0D2015 0%, #1A3A25 50%, #0F1A28 100%);
     border-radius: 24px; margin-bottom: 3rem;
-    position: relative; overflow: hidden; min-height: 320px;
+    position: relative; overflow: hidden; min-height: 380px;
 }
 .hero-left {
     padding: clamp(2rem, 5vw, 3.5rem);
@@ -206,7 +217,7 @@ div.stButton > button:hover {
     font-size: clamp(0.9rem, 2vw, 1.05rem); color: rgba(255,255,255,0.6);
     line-height: 1.7; margin-bottom: 0; max-width: 480px;
 }
-.car-img { width: 100%; max-width: 420px; filter: drop-shadow(0 20px 40px rgba(26,26,46,0.3)); }
+.car-img { width: 100%; max-width: 500px; filter: drop-shadow(0 25px 50px rgba(26,26,46,0.4)); }
 .features-grid {
     display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 1.2rem; margin-bottom: 3rem;
@@ -268,55 +279,6 @@ if logo_b64:
     )
 
 # Car SVG illustration
-car_svg = """
-<svg viewBox="0 0 500 280" xmlns="http://www.w3.org/2000/svg" class="car-img">
-  <defs>
-    <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#E8B84B;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#D4A43A;stop-opacity:1" />
-    </linearGradient>
-    <linearGradient id="roofGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#F0C96A;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#C89030;stop-opacity:1" />
-    </linearGradient>
-    <filter id="shadow">
-      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="rgba(232,184,75,0.4)"/>
-    </filter>
-  </defs>
-  <!-- Shadow -->
-  <ellipse cx="250" cy="245" rx="180" ry="18" fill="rgba(0,0,0,0.3)"/>
-  <!-- Car Body -->
-  <rect x="50" y="155" width="400" height="75" rx="18" fill="url(#bodyGrad)" filter="url(#shadow)"/>
-  <!-- Car Roof -->
-  <path d="M 130 155 Q 145 90 195 80 L 315 80 Q 365 90 375 155 Z" fill="url(#roofGrad)"/>
-  <!-- Windshield Front -->
-  <path d="M 310 155 Q 355 100 360 85 L 315 80 Q 280 80 270 155 Z" fill="rgba(150,220,255,0.6)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
-  <!-- Windshield Back -->
-  <path d="M 145 155 Q 148 100 145 85 L 195 80 Q 220 80 230 155 Z" fill="rgba(150,220,255,0.6)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
-  <!-- Windows -->
-  <path d="M 235 155 L 268 83 L 313 83 L 310 155 Z" fill="rgba(150,220,255,0.5)" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
-  <!-- Door Lines -->
-  <line x1="270" y1="155" x2="268" y2="100" stroke="rgba(180,120,10,0.5)" stroke-width="2"/>
-  <!-- Front bumper -->
-  <rect x="40" y="185" width="40" height="30" rx="8" fill="#C89030"/>
-  <!-- Rear bumper -->
-  <rect x="420" y="185" width="40" height="30" rx="8" fill="#C89030"/>
-  <!-- Headlight front -->
-  <ellipse cx="68" cy="185" rx="15" ry="10" fill="rgba(255,240,150,0.9)" stroke="#B8860B" stroke-width="1"/>
-  <!-- Headlight rear -->
-  <ellipse cx="432" cy="185" rx="15" ry="10" fill="rgba(255,100,100,0.9)" stroke="#8B0000" stroke-width="1"/>
-  <!-- Front Wheel -->
-  <circle cx="145" cy="228" r="38" fill="#1A1A2E" stroke="#E8B84B" stroke-width="4"/>
-  <circle cx="145" cy="228" r="22" fill="#252535" stroke="#E8B84B" stroke-width="2"/>
-  <circle cx="145" cy="228" r="8" fill="#E8B84B"/>
-  <!-- Rear Wheel -->
-  <circle cx="355" cy="228" r="38" fill="#1A1A2E" stroke="#E8B84B" stroke-width="4"/>
-  <circle cx="355" cy="228" r="22" fill="#252535" stroke="#E8B84B" stroke-width="2"/>
-  <circle cx="355" cy="228" r="8" fill="#E8B84B"/>
-  <!-- Shine -->
-  <path d="M 160 100 Q 220 88 290 92" stroke="rgba(255,255,255,0.4)" stroke-width="3" fill="none" stroke-linecap="round"/>
-</svg>
-"""
 
 st.markdown(
     f'<div class="hero-wrap">'
@@ -328,7 +290,7 @@ st.markdown(
     f'<h2 style="font-size:clamp(1rem,3vw,1.6rem);font-weight:700;color:rgba(255,255,255,0.85);margin:0 0 0.8rem 0;line-height:1.3;">Know Your Car\'s <span style="color:#E8B84B;">True Value</span> Instantly</h2>'
     f'<p class="hero-sub">Predict your used car\'s resale price using Machine Learning. Accurate, fast and completely free.</p>'
     f'</div>'
-    f'<div class="hero-right">{car_svg}</div>'
+    f'<div class="hero-right"><img src="data:image/png;base64,{car_img_b64}" class="car-img" /></div>'
     f'</div>'
     f'</div>',
     unsafe_allow_html=True
