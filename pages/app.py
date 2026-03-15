@@ -37,14 +37,6 @@ def get_logo_base64(path="riderepublic_logo.png"):
 
 logo_b64 = get_logo_base64()
 
-def get_car_base64(path="car_hero.png"):
-    try:
-        with open(path,"rb") as f:
-            return base64.b64encode(f.read())decode()
-    except:
-        return None
-car_b64 = get_car_base64()
-
 # ── Theme Toggle - NO on_label/off_label to avoid keyboard_double bug ────────
 # Custom theme toggle using session state
 if "dark_mode" not in st.session_state:
