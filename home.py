@@ -85,9 +85,22 @@ div.stButton > button:hover {
     display: grid; grid-template-columns: 1fr 1fr;
     align-items: center; min-height: 320px;
 }
-@media (max-width: 768px) {
+@media (max-width: 900px) {
     .hero-inner { grid-template-columns: 1fr; }
     .hero-right { display: none; }
+    .hero-wrap { min-height: auto; }
+    .hero-left { padding: 1.5rem; }
+    .stats-grid { grid-template-columns: 1fr; }
+    .steps-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 480px) {
+    .hero-title { font-size: 1.6rem !important; }
+    .hero-sub { font-size: 0.85rem !important; }
+    .features-grid { grid-template-columns: 1fr; }
+    .steps-grid { grid-template-columns: 1fr; }
+    .stats-grid { grid-template-columns: 1fr; }
+    .steps-wrap { padding: 1.5rem; }
+    div.stButton > button { font-size: 1rem !important; padding: 0.8rem 1rem !important; }
 }
 .hero-badge {
     display: inline-flex; align-items: center;
@@ -107,6 +120,12 @@ div.stButton > button:hover {
 }
 .car-img {
     width: 100%; max-width: 500px; filter: drop-shadow(0 25px 50px rgba(232,184,75,0.35));
+}
+/* Streamlit block container responsive */
+.block-container {
+    padding-left: clamp(0.5rem, 3vw, 5rem) !important;
+    padding-right: clamp(0.5rem, 3vw, 5rem) !important;
+    max-width: 1200px !important;
 }
 .features-grid {
     display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -197,9 +216,22 @@ div.stButton > button:hover {
 .hero-inner {
     display: grid; grid-template-columns: 1fr 1fr; align-items: center; min-height: 320px;
 }
-@media (max-width: 768px) {
+@media (max-width: 900px) {
     .hero-inner { grid-template-columns: 1fr; }
     .hero-right { display: none; }
+    .hero-wrap { min-height: auto; }
+    .hero-left { padding: 1.5rem; }
+    .stats-grid { grid-template-columns: 1fr; }
+    .steps-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 480px) {
+    .hero-title { font-size: 1.6rem !important; }
+    .hero-sub { font-size: 0.85rem !important; }
+    .features-grid { grid-template-columns: 1fr; }
+    .steps-grid { grid-template-columns: 1fr; }
+    .stats-grid { grid-template-columns: 1fr; }
+    .steps-wrap { padding: 1.5rem; }
+    div.stButton > button { font-size: 1rem !important; padding: 0.8rem 1rem !important; }
 }
 .hero-badge {
     display: inline-flex; align-items: center;
@@ -336,7 +368,7 @@ st.markdown(hero_html, unsafe_allow_html=True)
 # ── Get Started Button ────────────────────────────────────────────────────────
 _, btn_col, _ = st.columns([1, 3, 1])
 with btn_col:
-    if st.button("GET STARTED", use_container_width=True):
+    if st.button("🚗  Get Started - Predict Now  →", use_container_width=True):
         st.switch_page("pages/app.py")
 
 st.write("")
