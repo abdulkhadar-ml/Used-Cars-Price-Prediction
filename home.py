@@ -282,17 +282,18 @@ if logo_b64:
 
 car_html = f'<img src="data:image/png;base64,{car_b64}" class="car-img" />' if car_b64 else ''
 
+bg_img_tag = f'<img src="data:image/png;base64,{car_b64}" class="hero-bg-img" />' if car_b64 else ''
+
 st.markdown(
     f'<div class="hero-wrap">'
-    f'<div class="hero-inner">'
-    f'<div class="hero-left">'
+    f'{bg_img_tag}'
+    f'<div class="hero-overlay"></div>'
+    f'<div class="hero-content">'
     f'{logo_img}'
     f'<div class="hero-badge">AI-POWERED CAR VALUATION</div>'
     f'<h1 style="font-size:clamp(2rem,5vw,3.5rem);font-weight:900;color:#FFFFFF;margin:0 0 0.2rem 0;letter-spacing:-1px;line-height:1.1;">Ride<span style="color:#E8B84B;">Republic</span></h1>'
     f'<h2 style="font-size:clamp(1rem,3vw,1.6rem);font-weight:700;color:rgba(255,255,255,0.85);margin:0 0 0.8rem 0;line-height:1.3;">Know Your Car\'s <span style="color:#E8B84B;">True Value</span> Instantly</h2>'
     f'<p class="hero-sub">Predict your used car\'s resale price using Machine Learning. Accurate, fast and completely free.</p>'
-    f'</div>'
-    f'<div class="hero-right">{car_html}</div>'
     f'</div>'
     f'</div>',
     unsafe_allow_html=True
