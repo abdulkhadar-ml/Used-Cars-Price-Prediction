@@ -44,7 +44,7 @@ with st.sidebar:
     if st.sidebar.button(toggle_label, key="theme_toggle"):
         st.session_state.dark_mode = not st.session_state.dark_mode
         st.rerun()
-    if st.sidebar.button("🏠 Home", key="home_btn"):
+    if st.sidebar.button("Home", key="home_btn"):
         st.switch_page("home.py")
 
 mode = st.session_state.dark_mode
